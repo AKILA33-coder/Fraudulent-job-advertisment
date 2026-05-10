@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Detector — TrueHire AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#F5A623;--red:#E84545;--green:#22C55E;--blue:#3B82F6;--dark:#070707;--bg:#0C0C0C;--card:#111;--border:#1E1E1E;--text:#EDEBE5;--muted:#666;--font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:var(--dark);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0}
+.sb-logo{padding:1.4rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.sb-logo-mark{width:32px;height:32px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem}
+.sb-logo-text{font-family:var(--font-h);font-size:1rem;font-weight:800}
+.sb-nav{flex:1;padding:1rem 0}
+.sb-sec{padding:.4rem 1.2rem;font-size:.6rem;font-weight:700;color:#333;letter-spacing:.1em;text-transform:uppercase;margin:.8rem 0 .3rem}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 1.2rem;font-size:.82rem;color:var(--muted);text-decoration:none;transition:all .15s;border-left:2px solid transparent}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+.sb-item.active{color:var(--gold);background:rgba(245,166,35,0.06);border-left-color:var(--gold)}
+.sb-user{padding:1rem 1.2rem;border-top:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:10px}
+.user-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E84545);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:#000;flex-shrink:0}
+.user-nm{font-size:.8rem;font-weight:600}.user-rl{font-size:.65rem;color:var(--muted)}
+.logout-btn{margin-left:auto;font-size:.7rem;color:var(--muted);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:none;font-family:var(--font-b);transition:all .2s}
+.logout-btn:hover{color:var(--red);border-color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--dark);border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:var(--font-h);font-size:1rem;font-weight:700;display:flex;align-items:center;gap:10px}
+.ml-badge{font-size:.6rem;padding:3px 10px;background:rgba(232,69,69,0.1);color:#FCA5A5;border:1px solid rgba(232,69,69,0.2);border-radius:12px;font-weight:700}
+.content{padding:2rem;flex:1}
+.page-title{font-family:var(--font-h);font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.4rem}
+.page-sub{font-size:.84rem;color:var(--muted);margin-bottom:1.8rem;line-height:1.7}
+.mode-tabs{display:flex;gap:8px;margin-bottom:1.4rem;flex-wrap:wrap}
+.mode-tab{padding:8px 18px;background:#141414;border:1px solid var(--border);border-radius:8px;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;font-family:var(--font-b)}
+.mode-tab.active{background:rgba(232,69,69,0.1);border-color:rgba(232,69,69,0.3);color:#FCA5A5}
+.input-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem}
+.ic-header{padding:.9rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ic-title{font-size:.82rem;font-weight:700}
+.ic-sub{font-size:.7rem;color:var(--muted)}
+.ic-body{padding:1.5rem}
+.textarea-big{width:100%;background:#0D0D0D;border:1px solid var(--border);border-radius:10px;padding:1.2rem;color:var(--text);font-size:.83rem;font-family:var(--font-b);resize:vertical;outline:none;line-height:1.7;transition:border .2s;min-height:150px}
+.textarea-big:focus{border-color:rgba(245,166,35,.3)}
+.url-row{display:flex;gap:8px;margin-bottom:10px}
+.url-input{flex:1;padding:11px 14px;background:#0D0D0D;border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:.83rem;font-family:var(--font-b);outline:none;transition:border .2s}
+.url-input:focus{border-color:rgba(245,166,35,.4)}
+.url-input::placeholder{color:#333}
+.fetch-btn{padding:11px 18px;background:var(--gold);color:#000;border:none;border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:var(--font-b);transition:all .2s;white-space:nowrap}
+.fetch-btn:hover{background:#e0941c}
+.fetch-btn:disabled{background:#2A2A2A;color:var(--muted);cursor:not-allowed}
+.url-help{font-size:.72rem;color:var(--muted);padding:.8rem 1rem;background:#0D0D0D;border:1px solid var(--border);border-radius:8px;line-height:1.6;margin-bottom:.5rem}
+.url-help strong{color:var(--gold)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.fg-label{font-size:.65rem;font-weight:700;color:#444;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.fg-input{width:100%;padding:10px 12px;background:#141414;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.82rem;font-family:var(--font-b);outline:none;transition:border .2s}
+.fg-input:focus{border-color:rgba(245,166,35,.4)}
+.analyze-btn{width:100%;padding:14px;background:var(--gold);color:#000;font-weight:800;font-size:.9rem;border:none;border-radius:10px;cursor:pointer;font-family:var(--font-h);letter-spacing:.02em;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:1rem}
+.analyze-btn:hover{background:#e0941c;transform:translateY(-1px)}
+.analyze-btn:disabled{background:#2A2A2A;color:var(--muted);cursor:not-allowed;transform:none}
+.result-panel{display:none;margin-bottom:1.5rem}
+.result-panel.visible{display:grid;grid-template-columns:1fr 2fr;gap:16px}
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;text-align:center;position:relative;overflow:hidden}
+.score-glow{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;opacity:.04;pointer-events:none}
+.score-ring{position:relative;width:140px;height:140px;margin:0 auto 1rem}
+.score-ring svg{transform:rotate(-90deg)}
+.sr-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sr-pct{font-family:var(--font-h);font-size:2.2rem;font-weight:800;line-height:1;transition:color .5s}
+.sr-lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.verdict-badge{padding:8px 20px;border-radius:20px;font-size:.82rem;font-weight:700;display:inline-block;margin-bottom:1rem}
+.vb-danger{background:rgba(232,69,69,.12);color:#FCA5A5;border:1px solid rgba(232,69,69,.3)}
+.vb-warn{background:rgba(245,166,35,.12);color:#FCD34D;border:1px solid rgba(245,166,35,.3)}
+.vb-safe{background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.3)}
+.result-desc{font-size:.75rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.action-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.act-btn{padding:6px 14px;background:#1A1A1A;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.7rem;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.act-btn:hover{background:#222;color:var(--text)}
+.signals-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.signals-hdr{font-family:var(--font-h);font-size:.9rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.sig-count{font-size:.7rem;color:var(--muted);font-family:var(--font-b);font-weight:400}
+.sig-grp{margin-bottom:1.1rem}.sig-grp:last-child{margin-bottom:0}
+.sig-glbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;padding:3px 10px;border-radius:6px;display:inline-block}
+.sgl-r{background:rgba(232,69,69,.1);color:#FCA5A5}.sgl-y{background:rgba(245,166,35,.1);color:#FCD34D}.sgl-g{background:rgba(34,197,94,.1);color:#86EFAC}
+.sig-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #141414}
+.sig-item:last-child{border:none}
+.sig-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.sd-r{background:var(--red)}.sd-y{background:var(--gold)}.sd-g{background:var(--green)}
+.sig-text{font-size:.8rem;color:var(--text);flex:1;line-height:1.5}
+.no-sigs{font-size:.8rem;color:var(--muted);padding:1rem 0;text-align:center}
+.risk-explainer{margin-top:1rem;padding-top:1rem;border-top:1px solid #141414}
+.re-label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+.re-text{font-size:.76rem;color:var(--muted);line-height:1.6}
+.tips-card{background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(59,130,246,.04));border:1px solid rgba(139,92,246,.2);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem}
+.tips-title{font-family:var(--font-h);font-size:.86rem;font-weight:700;color:#C4B5FD;margin-bottom:.7rem}
+.tip-item{display:flex;gap:10px;padding:5px 0;font-size:.77rem;color:var(--muted);line-height:1.5}
+.tip-icon{flex-shrink:0}
+.history-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin-top:1.5rem}
+.hist-hdr{font-family:var(--font-h);font-size:.88rem;font-weight:700;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+.hist-sub{font-size:.7rem;color:var(--muted);font-family:var(--font-b);font-weight:400}
+.hist-row{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid #141414;font-size:.78rem;border-radius:6px;transition:background .15s;cursor:default}
+.hist-row:hover{background:rgba(255,255,255,.02)}
+.hist-row:last-child{border:none}
+.hist-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.hist-title{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-co{font-size:.65rem;color:var(--muted);margin-top:1px}
+.hist-score{font-weight:700;min-width:36px;text-align:right;font-size:.75rem}
+.hist-badge{font-size:.58rem;padding:2px 8px;border-radius:6px;font-weight:700}
+.hb-d{background:rgba(232,69,69,.1);color:#FCA5A5}.hb-w{background:rgba(245,166,35,.1);color:#FCD34D}.hb-s{background:rgba(34,197,94,.1);color:#86EFAC}
+.hist-empty{font-size:.8rem;color:var(--muted);text-align:center;padding:1.5rem}
+.clear-btn{font-size:.7rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.clear-btn:hover{color:var(--red);border-color:var(--red)}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1A1A1A;border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:.8rem;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:300px}
+.toast.show{transform:translateY(0);opacity:1}
+@media(max-width:900px){.result-panel.visible{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/landing.html" class="sb-logo">
+    <div class="sb-logo-mark">🛡️</div>
+    <div class="sb-logo-text">TrueHire AI</div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-sec">Navigation</div>
+    <a href="/dashboard.html" class="sb-item">📊 Overview</a>
+    <a href="/detector.html"  class="sb-item active">🛡️ Job Detector</a>
+    <a href="/recommend.html" class="sb-item">💼 Job Matches</a>
+  </nav>
+  <div class="sb-user">
+    <div class="user-row">
+      <div class="user-av" id="sideAv">?</div>
+      <div><div class="user-nm" id="sideNm">Loading…</div><div class="user-rl">Job Seeker</div></div>
+      <button class="logout-btn" onclick="signOut()">⎋</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">🛡️ Job Detector <span class="ml-badge">RF + ET + LR</span></div>
+    <div style="font-size:.72rem;color:var(--muted)">Accuracy: <span style="color:var(--green)">94.2%</span></div>
+  </div>
+
+  <div class="content">
+    <div class="page-title">Fake Job Detector</div>
+    <div class="page-sub">Paste a job description, enter a URL to extract text, or fill in the details manually. Powered by Random Forest + Extra Trees + Logistic Regression ensemble.</div>
+
+    <!-- MODE TABS -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="setMode('paste',this)">📋 Paste Description</button>
+      <button class="mode-tab"        onclick="setMode('url',this)">🔗 Check Job URL</button>
+      <button class="mode-tab"        onclick="setMode('manual',this)">✏️ Manual Entry</button>
+    </div>
+
+    <!-- INPUT CARD -->
+    <div class="input-card">
+      <div class="ic-header">
+        <div class="ic-title" id="inputTitle">📋 Paste Job Description</div>
+        <div class="ic-sub"   id="inputSub">Supports any language or format</div>
+      </div>
+      <div class="ic-body">
+
+        <!-- PASTE MODE -->
+        <div id="mode-paste">
+          <textarea class="textarea-big" id="jobInput" rows="9"
+            placeholder="Paste the full job description here...&#10;&#10;Include: Job Title, Company, Salary, Requirements, Contact info etc.&#10;The more text you paste, the more accurate the analysis."></textarea>
+        </div>
+
+        <!-- URL MODE -->
+        <div id="mode-url" style="display:none">
+          <div class="url-help">
+            <strong>How to use URL mode:</strong><br>
+            1. Paste the job posting URL below and click <strong>Extract Text</strong><br>
+            2. If auto-extract fails (blocked by the job site), open the URL in your browser, select all text (Ctrl+A), copy it, then paste into the text box below<br>
+            3. Click <strong>Analyze Job Posting</strong>
+          </div>
+          <div class="url-row">
+            <input class="url-input" type="url" id="urlInput"
+              placeholder="https://linkedin.com/jobs/... or https://naukri.com/... or any job URL">
+            <button class="fetch-btn" id="fetchBtn" onclick="fetchFromUrl()">🔍 Extract Text</button>
+          </div>
+          <textarea class="textarea-big" id="urlJobText" rows="7"
+            placeholder="Extracted job text will appear here after clicking Extract Text...&#10;&#10;Or paste the job text manually here if auto-extract fails."></textarea>
+        </div>
+
+        <!-- MANUAL MODE -->
+        <div id="mode-manual" style="display:none">
+          <div class="form-grid">
+            <div><div class="fg-label">Job Title</div><input class="fg-input" id="manTitle"   placeholder="e.g. Data Entry Specialist"></div>
+            <div><div class="fg-label">Company Name</div><input class="fg-input" id="manCompany" placeholder="e.g. Zoho Corporation"></div>
+            <div><div class="fg-label">Salary / Package</div><input class="fg-input" id="manSalary"  placeholder="e.g. 12 LPA or Rs 15000/month"></div>
+            <div><div class="fg-label">Contact Method</div><input class="fg-input" id="manContact" placeholder="e.g. careers@company.com"></div>
+          </div>
+          <div class="fg-label">Full Job Description</div>
+          <textarea class="textarea-big" id="manDesc" rows="5"
+            placeholder="Type or paste the full job description, requirements, and responsibilities..."></textarea>
+        </div>
+
+        <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+          🔍 Analyze Job Posting
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULT PANEL -->
+    <div class="result-panel" id="resultPanel">
+      <div class="score-card">
+        <div class="score-glow" id="scoreGlow"></div>
+        <div class="score-ring">
+          <svg viewBox="0 0 140 140" width="140" height="140">
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#1A1A1A" stroke-width="10"/>
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#E84545" stroke-width="10"
+              stroke-dasharray="364" stroke-dashoffset="364" stroke-linecap="round"
+              id="scoreArc" style="transition:stroke-dashoffset 1.2s cubic-bezier(.25,.8,.25,1),stroke .5s"/>
+          </svg>
+          <div class="sr-inner">
+            <div class="sr-pct" id="scorePct">0%</div>
+            <div class="sr-lbl">Fraud Risk</div>
+          </div>
+        </div>
+        <div class="verdict-badge vb-safe" id="verdictBadge">Analyzing…</div>
+        <div class="result-desc" id="resultDesc"></div>
+        <div class="action-row">
+          <button class="act-btn" onclick="copyReport()">📋 Copy Report</button>
+          <button class="act-btn" onclick="shareResult()">🔗 Share</button>
+          <button class="act-btn" onclick="reportScam()">🚨 Report</button>
+        </div>
+      </div>
+
+      <div class="signals-card">
+        <div class="signals-hdr">
+          Fraud Signals Detected
+          <span class="sig-count" id="signalCount">—</span>
+        </div>
+        <div id="signalsBody"><div class="no-sigs">Waiting for analysis…</div></div>
+        <div class="risk-explainer">
+          <div class="re-label">What does this score mean?</div>
+          <div class="re-text" id="riskExplainer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAFETY TIPS -->
+    <div class="tips-card">
+      <div class="tips-title">🛡️ How to Stay Safe from Fake Jobs</div>
+      <div class="tip-item"><span class="tip-icon">💸</span>Never pay any fee to get a job — registration, training or equipment fees are classic scam tactics.</div>
+      <div class="tip-item"><span class="tip-icon">📧</span>Legitimate companies always provide official domain emails, not Gmail or Yahoo.</div>
+      <div class="tip-item"><span class="tip-icon">📱</span>Avoid jobs that only contact via WhatsApp or Telegram — real recruiters use official channels.</div>
+      <div class="tip-item"><span class="tip-icon">🔍</span>Google the company name + "scam" or "review" before applying.</div>
+      <div class="tip-item"><span class="tip-icon">💰</span>Salaries of Rs 500–1000 per day for simple home tasks are almost always fake.</div>
+    </div>
+
+    <!-- SCAN HISTORY -->
+    <div class="history-card">
+      <div class="hist-hdr">
+        Scan History
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="hist-sub" id="histCount">Last 20 scans</span>
+          <button class="clear-btn" onclick="clearHistView()">Clear View</button>
+        </div>
+      </div>
+      <div id="historyBody">
+        <div class="hist-empty">No scans yet. Paste a job description above to get started.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var lastResult  = null;
+var currentMode = 'paste';
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+
+// ── Mode switcher ──────────────────────────────────────────────────────────
+function setMode(m, btn) {
+  currentMode = m;
+  document.querySelectorAll('.mode-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('mode-paste').style.display  = m==='paste'  ? 'block' : 'none';
+  document.getElementById('mode-url').style.display    = m==='url'    ? 'block' : 'none';
+  document.getElementById('mode-manual').style.display = m==='manual' ? 'block' : 'none';
+
+  var titles = {paste:'📋 Paste Job Description', url:'🔗 Check Job URL', manual:'✏️ Manual Entry'};
+  var subs   = {paste:'Supports any language or format', url:'Extract text from any job posting URL', manual:'Fill in job details manually'};
+  var btns   = {paste:'🔍 Analyze Job Posting', url:'🔍 Analyze Job Posting', manual:'🔍 Analyze Job'};
+  document.getElementById('inputTitle').textContent        = titles[m];
+  document.getElementById('inputSub').textContent          = subs[m];
+  document.getElementById('analyzeBtn').textContent        = btns[m];
+}
+
+// ── Get job text from current mode ─────────────────────────────────────────
+function getJobText() {
+  if (currentMode === 'paste')  return (document.getElementById('jobInput').value  || '').trim();
+  if (currentMode === 'url')    return (document.getElementById('urlJobText').value || '').trim();
+  if (currentMode === 'manual') {
+    var t = document.getElementById('manTitle').value   || '';
+    var c = document.getElementById('manCompany').value || '';
+    var s = document.getElementById('manSalary').value  || '';
+    var ct= document.getElementById('manContact').value || '';
+    var d = document.getElementById('manDesc').value    || '';
+    return [t, c, s ? 'Salary: '+s : '', ct ? 'Contact: '+ct : '', d].filter(Boolean).join('\n').trim();
+  }
+  return '';
+}
+
+function getMetadata() {
+  if (currentMode === 'manual') {
+    return {
+      job_title: document.getElementById('manTitle').value   || 'Unknown Title',
+      company:   document.getElementById('manCompany').value || 'Unknown Company'
+    };
+  }
+  return { job_title: 'Unknown Title', company: 'Unknown Company' };
+}
+
+// ── URL Fetch — tries multiple CORS proxies ────────────────────────────────
+function fetchFromUrl() {
+  var url = document.getElementById('urlInput').value.trim();
+  if (!url) { showToast('Please enter a job URL first'); return; }
+
+  // Validate URL format
+  try { new URL(url); } catch(e) { showToast('Please enter a valid URL (start with https://)'); return; }
+
+  var btn = document.getElementById('fetchBtn');
+  btn.textContent = '⏳ Fetching…';
+  btn.disabled    = true;
+
+  var proxies = [
+    'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
+    'https://corsproxy.io/?' + encodeURIComponent(url),
+  ];
+
+  function tryProxy(idx) {
+    if (idx >= proxies.length) {
+      // All proxies failed — show manual instructions
+      document.getElementById('urlJobText').value = '';
+      document.getElementById('urlJobText').placeholder =
+        'Auto-extract failed.\n\nManual steps:\n1. Open the URL in your browser\n2. Press Ctrl+A to select all text\n3. Press Ctrl+C to copy\n4. Click in this box and press Ctrl+V to paste\n5. Then click "Analyze Job Posting"';
+      showToast('Auto-extract failed — please paste the text manually');
+      btn.textContent = '🔍 Extract Text';
+      btn.disabled    = false;
+      return;
+    }
+
+    fetch(proxies[idx], { signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var raw = data.contents || data.body || data.data || '';
+        if (!raw || raw.length < 100) throw new Error('Empty or too short');
+
+        // Strip HTML
+        var tmp = document.createElement('div');
+        tmp.innerHTML = raw;
+        tmp.querySelectorAll('script,style,nav,header,footer,aside,iframe').forEach(function(el){ el.remove(); });
+        var text = (tmp.innerText || tmp.textContent || '').replace(/\s{3,}/g, '\n\n').trim();
+
+        if (text.length < 50) throw new Error('Not enough text extracted');
+
+        document.getElementById('urlJobText').value = text.slice(0, 4000);
+        showToast('Text extracted! Review and click Analyze.');
+        btn.textContent = '🔍 Extract Text';
+        btn.disabled    = false;
+      })
+      .catch(function() {
+        tryProxy(idx + 1); // try next proxy
+      });
+  }
+
+  tryProxy(0);
+}
+
+// ── Update score gauge ─────────────────────────────────────────────────────
+function updateGauge(score) {
+  var arc  = document.getElementById('scoreArc');
+  var pct  = document.getElementById('scorePct');
+  var glow = document.getElementById('scoreGlow');
+  arc.style.strokeDashoffset = 364 - (364 * score / 100);
+  arc.style.stroke  = score>=70 ? '#E84545' : score>=40 ? '#F5A623' : '#22C55E';
+  pct.textContent   = score + '%';
+  pct.style.color   = score>=70 ? '#FCA5A5' : score>=40 ? '#FCD34D' : '#86EFAC';
+  glow.style.background = score>=70 ? '#E84545' : score>=40 ? '#F5A623' : '#22C55E';
+}
+
+// ── Update verdict ─────────────────────────────────────────────────────────
+function updateVerdict(score) {
+  var badge = document.getElementById('verdictBadge');
+  var desc  = document.getElementById('resultDesc');
+  var expl  = document.getElementById('riskExplainer');
+  if (score >= 70) {
+    badge.textContent = '\u26A0\uFE0F HIGH RISK \u2014 Likely Scam';
+    badge.className   = 'verdict-badge vb-danger';
+    desc.textContent  = 'Multiple high-risk fraud signals detected. Do NOT pay any fee, share personal info, or apply via WhatsApp.';
+    expl.innerHTML    = '<span style="color:#FCA5A5">Score 70-100%</span>: Very likely a scam. Common patterns of fraudulent job postings detected.';
+  } else if (score >= 40) {
+    badge.textContent = '\u26A0\uFE0F MEDIUM RISK \u2014 Suspicious';
+    badge.className   = 'verdict-badge vb-warn';
+    desc.textContent  = 'Some suspicious patterns found. Verify the company independently before applying.';
+    expl.innerHTML    = '<span style="color:#FCD34D">Score 40-69%</span>: Potentially suspicious. Verify the company through official channels.';
+  } else {
+    badge.textContent = '\u2705 LOW RISK \u2014 Appears Legitimate';
+    badge.className   = 'verdict-badge vb-safe';
+    desc.textContent  = 'No major fraud signals detected. Always verify independently before sharing personal data.';
+    expl.innerHTML    = '<span style="color:#86EFAC">Score 0-39%</span>: Likely legitimate. Still do your own verification before applying.';
+  }
+}
+
+// ── Render signals ─────────────────────────────────────────────────────────
+function renderSignals(signals) {
+  var body  = document.getElementById('signalsBody');
+  var count = document.getElementById('signalCount');
+  var total = (signals.high||[]).length + (signals.medium||[]).length + (signals.low||[]).length;
+  count.textContent = total + ' signal' + (total!==1?'s':'') + ' found';
+
+  if (!total) { body.innerHTML = '<div class="no-sigs">\u2705 No fraud signals detected.</div>'; return; }
+
+  var html = '';
+  if ((signals.high||[]).length) {
+    html += '<div class="sig-grp"><span class="sig-glbl sgl-r">\uD83D\uDD34 HIGH RISK</span>';
+    signals.high.forEach(function(s){ html += '<div class="sig-item"><div class="sig-dot sd-r"></div><div class="sig-text">'+s+'</div></div>'; });
+    html += '</div>';
+  }
+  if ((signals.medium||[]).length) {
+    html += '<div class="sig-grp"><span class="sig-glbl sgl-y">\uD83D\uDFE1 MEDIUM RISK</span>';
+    signals.medium.forEach(function(s){ html += '<div class="sig-item"><div class="sig-dot sd-y"></div><div class="sig-text">'+s+'</div></div>'; });
+    html += '</div>';
+  }
+  if ((signals.low||[]).length) {
+    html += '<div class="sig-grp"><span class="sig-glbl sgl-g">\uD83D\uDFE2 LOW RISK</span>';
+    signals.low.forEach(function(s){ html += '<div class="sig-item"><div class="sig-dot sd-g"></div><div class="sig-text">'+s+'</div></div>'; });
+    html += '</div>';
+  }
+  body.innerHTML = html;
+}
+
+// ── Main analysis ──────────────────────────────────────────────────────────
+function runAnalysis() {
+  var jobText = getJobText();
+  if (!jobText) { showToast('Please paste or enter a job description first.'); return; }
+
+  var meta = getMetadata();
+  var btn  = document.getElementById('analyzeBtn');
+  btn.textContent = '\u23F3 Analyzing with AI\u2026';
+  btn.disabled    = true;
+
+  // Show result panel with placeholder
+  document.getElementById('resultPanel').classList.add('visible');
+  document.getElementById('scorePct').textContent      = '\u2026';
+  document.getElementById('verdictBadge').textContent  = 'Analyzing\u2026';
+  document.getElementById('verdictBadge').className    = 'verdict-badge';
+  document.getElementById('resultDesc').textContent    = 'ML model processing your job description\u2026';
+  document.getElementById('signalsBody').innerHTML     = '<div class="no-sigs">Running analysis\u2026</div>';
+  document.getElementById('riskExplainer').textContent = '';
+
+  fetch('/api/analyze/job', {
+    method:  'POST',
+    headers: {'Content-Type': 'application/json'},
+    body:    JSON.stringify({
+      job_text:  jobText,
+      job_title: meta.job_title,
+      company:   meta.company
+    })
+  })
+  .then(function(r) {
+    if (r.status === 401) { window.location.href = '/login.html'; return null; }
+    return r.json();
+  })
+  .then(function(data) {
+    if (!data) return;
+    if (data.error) {
+      showToast('Error: ' + data.error);
+      document.getElementById('resultPanel').classList.remove('visible');
+      return;
+    }
+    lastResult = data;
+    updateGauge(data.score);
+    updateVerdict(data.score);
+    renderSignals(data.signals);
+    document.getElementById('resultPanel').scrollIntoView({behavior:'smooth', block:'start'});
+    loadHistory();
+  })
+  .catch(function(e) {
+    showToast('Connection error — is the server running on port 5000?');
+    document.getElementById('resultPanel').classList.remove('visible');
+  })
+  .finally(function() {
+    btn.textContent = '\uD83D\uDD0D Analyze Job Posting';
+    btn.disabled    = false;
+  });
+}
+
+// ── Action buttons ─────────────────────────────────────────────────────────
+function copyReport() {
+  if (!lastResult) { showToast('Run an analysis first'); return; }
+  var s    = lastResult;
+  var sigs = []
+    .concat((s.signals.high   || []).map(function(x){ return '[HIGH] ' + x; }))
+    .concat((s.signals.medium || []).map(function(x){ return '[MEDIUM] ' + x; }))
+    .concat((s.signals.low    || []).map(function(x){ return '[LOW] ' + x; }));
+  var text = 'TrueHire AI \u2014 Fraud Analysis Report\n' +
+    '='.repeat(38) + '\n' +
+    'Risk Score : ' + s.score + '%\n' +
+    'Verdict    : ' + s.verdict + '\n' +
+    'Analysed   : ' + new Date(s.timestamp).toLocaleString() + '\n\n' +
+    'Signals Found:\n' + sigs.join('\n');
+  navigator.clipboard.writeText(text)
+    .then(function(){ showToast('\u2705 Report copied to clipboard!'); })
+    .catch(function(){ showToast('Copy failed'); });
+}
+
+function shareResult() {
+  if (!lastResult) { showToast('Run an analysis first'); return; }
+  var text = 'I checked a job on TrueHire AI!\nRisk: ' +
+    lastResult.score + '% | ' + lastResult.verdict +
+    '\nProtect yourself from fake jobs!';
+  if (navigator.share) {
+    navigator.share({title: 'TrueHire AI Report', text: text}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function(){ showToast('Share text copied!'); });
+  }
+}
+
+function reportScam() {
+  showToast('\uD83D\uDEA8 Scam reported — thank you for helping others!');
+}
+
+// ── History ────────────────────────────────────────────────────────────────
+function loadHistory() {
+  fetch('/api/analysis/history')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var body = document.getElementById('historyBody');
+      var hc   = document.getElementById('histCount');
+      if (!d.analyses || !d.analyses.length) {
+        body.innerHTML = '<div class="hist-empty">No scans yet. Paste a job description above to get started.</div>';
+        return;
+      }
+      hc.textContent = 'Last ' + d.analyses.length + ' scans';
+      body.innerHTML = d.analyses.map(function(a) {
+        var s   = a.risk_score || 0;
+        var dot = s>=70 ? 'var(--red)' : s>=40 ? 'var(--gold)' : 'var(--green)';
+        var bc  = s>=70 ? 'hb-d' : s>=40 ? 'hb-w' : 'hb-s';
+        var bt  = s>=70 ? 'FAKE' : s>=40 ? 'SUSPECT' : 'SAFE \u2713';
+        var sc  = s>=70 ? '#FCA5A5' : s>=40 ? '#FCD34D' : '#86EFAC';
+        var dt  = new Date(a.created_at).toLocaleString();
+        return '<div class="hist-row">' +
+          '<div class="hist-dot" style="background:'+dot+'"></div>' +
+          '<div style="flex:1">' +
+            '<div class="hist-title">'+(a.job_title||'Unknown Job')+'</div>' +
+            '<div class="hist-co">'+(a.company||'Unknown')+' \u00B7 '+dt+'</div>' +
+          '</div>' +
+          '<div class="hist-score" style="color:'+sc+'">'+s+'%</div>' +
+          '<div class="hist-badge '+bc+'">'+bt+'</div>' +
+        '</div>';
+      }).join('');
+    })
+    .catch(function(){});
+}
+
+function clearHistView() {
+  document.getElementById('historyBody').innerHTML =
+    '<div class="hist-empty">History view cleared. Your scan data is still saved in the database.</div>';
+  document.getElementById('histCount').textContent = 'Cleared';
+  showToast('History view cleared');
+}
+
+// ── Auth check ─────────────────────────────────────────────────────────────
+fetch('/api/auth/user')
+  .then(function(r) {
+    if (r.status === 401) { window.location.href = '/login.html'; return null; }
+    return r.json();
+  })
+  .then(function(d) {
+    if (!d || !d.authenticated) { window.location.href = '/login.html'; return; }
+    var fn = d.first_name || '?', ln = d.last_name || '';
+    document.getElementById('sideNm').textContent = fn + ' ' + ln;
+    document.getElementById('sideAv').textContent = (fn[0]||'?').toUpperCase() + (ln[0]||'').toUpperCase();
+  })
+  .catch(function(){ window.location.href = '/login.html'; });
+
+function signOut() {
+  fetch('/api/auth/logout', {method:'POST'})
+    .then(function(){ window.location.href = '/login.html'; })
+    .catch(function(){ window.location.href = '/login.html'; });
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadHistory();
+</script>
+</body>
+</html>

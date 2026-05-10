@@ -1,0 +1,14 @@
+{
+  "total": 10000,
+  "fake": 5000,
+  "legitimate": 5000,
+  "generated": "2026-04-17T20:25:51.915582",
+  "columns": [
+    "job_id",
+    "title",
+    "company",
+    "location",
+    "description",
+    "fraudulent"
+  ]
+}

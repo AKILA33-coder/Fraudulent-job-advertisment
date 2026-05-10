@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — TrueHire AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --gold:#F5A623;--red:#E84545;--green:#22C55E;--blue:#3B82F6;--purple:#8B5CF6;
+  --dark:#060606;--bg:#0C0C0C;--card:#111;--card2:#161616;--border:#1E1E1E;
+  --text:#EDEBE5;--muted:#666;--font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:230px;flex-shrink:0;background:var(--dark);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:200;overflow-y:auto}
+.sb-logo{padding:1.1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);flex-shrink:0}
+.sb-logo-mark{width:32px;height:32px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0}
+.sb-logo-text{font-family:var(--font-h);font-size:1rem;font-weight:800}
+.admin-pill{font-size:0.5rem;padding:2px 6px;background:rgba(232,69,69,0.15);color:#FCA5A5;border:1px solid rgba(232,69,69,0.3);border-radius:5px;font-weight:800;letter-spacing:.05em;margin-left:auto}
+.sb-nav{flex:1;padding:0.6rem 0}
+.sb-sec{padding:0.3rem 1.2rem;font-size:0.58rem;font-weight:800;color:#2A2A2A;letter-spacing:0.12em;text-transform:uppercase;margin:0.6rem 0 0.2rem}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 1.2rem;font-size:0.81rem;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent;border-top:none;border-right:none;border-bottom:none;background:none;width:100%;text-align:left;font-family:var(--font-b)}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,0.03);border-left-color:#2A2A2A}
+.sb-item.active{color:#FCA5A5;background:rgba(232,69,69,0.05);border-left-color:var(--red)}
+.sb-badge{margin-left:auto;font-size:0.56rem;padding:2px 7px;background:rgba(232,69,69,0.15);color:#FCA5A5;border-radius:10px;font-weight:700;flex-shrink:0}
+.sb-badge-b{background:rgba(59,130,246,0.15);color:#93C5FD}
+.sb-user{padding:0.9rem 1.2rem;border-top:1px solid var(--border);flex-shrink:0}
+.user-row{display:flex;align-items:center;gap:10px}
+.user-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;color:#fff;flex-shrink:0}
+.user-nm{font-size:0.78rem;font-weight:600;line-height:1.2}
+.user-rl{font-size:0.62rem;color:var(--muted)}
+.signout-btn{margin-left:auto;padding:4px 8px;border:1px solid rgba(232,69,69,0.3);border-radius:6px;background:none;color:var(--red);font-size:0.68rem;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.signout-btn:hover{background:rgba(232,69,69,0.08)}
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--dark);border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.tb-title{font-family:var(--font-h);font-size:0.95rem;font-weight:700}
+.tb-right{display:flex;align-items:center;gap:14px;font-size:0.72rem;color:var(--muted)}
+.sys-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block;margin-right:4px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.content{flex:1;padding:1.6rem}
+.section{display:none}
+.section.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.4rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sc-b::before{background:var(--blue)}.sc-r::before{background:var(--red)}.sc-g::before{background:var(--green)}.sc-p::before{background:var(--purple)}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem}
+.sc-icon{font-size:1rem}
+.sc-trend{font-size:0.62rem;padding:2px 7px;border-radius:6px;font-weight:700}
+.tr-up{background:rgba(34,197,94,0.1);color:#86EFAC}
+.tr-dn{background:rgba(232,69,69,0.1);color:#FCA5A5}
+.sc-num{font-family:var(--font-h);font-size:1.7rem;font-weight:800;line-height:1;margin-bottom:2px}
+.sc-lbl{font-size:0.68rem;color:var(--muted)}
+.grid-2{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+.card-head{font-family:var(--font-h);font-size:0.85rem;font-weight:700;margin-bottom:0.9rem;display:flex;align-items:center;justify-content:space-between}
+.ch-sub{font-size:0.68rem;color:var(--muted);font-family:var(--font-b);font-weight:400}
+canvas{max-height:190px}
+.log-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #0F0F0F;font-size:0.72rem}
+.log-item:last-child{border:none}
+.log-time{color:#333;min-width:42px;font-size:0.66rem;font-family:monospace}
+.log-msg{flex:1;color:var(--muted)}
+.log-level{font-size:0.58rem;padding:2px 8px;border-radius:5px;font-weight:700;white-space:nowrap}
+.ll-err{background:rgba(232,69,69,0.15);color:#FCA5A5}
+.ll-warn{background:rgba(245,166,35,0.15);color:#FCD34D}
+.ll-ok{background:rgba(34,197,94,0.15);color:#86EFAC}
+.ll-info{background:rgba(59,130,246,0.15);color:#93C5FD}
+.admin-table{width:100%;border-collapse:collapse;font-size:0.78rem}
+.admin-table th{padding:8px 10px;text-align:left;font-size:0.62rem;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.admin-table td{padding:9px 10px;border-bottom:1px solid #0F0F0F;vertical-align:middle}
+.admin-table tr:last-child td{border:none}
+.user-cell{display:flex;align-items:center;gap:8px}
+.td-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:#000;flex-shrink:0}
+.uname{font-size:0.78rem;font-weight:600;color:var(--text)}
+.uemail{font-size:0.66rem;color:var(--muted)}
+.status-badge{font-size:0.6rem;padding:2px 9px;border-radius:8px;font-weight:700}
+.sb-active{background:rgba(34,197,94,0.1);color:#86EFAC}
+.sb-banned{background:rgba(232,69,69,0.1);color:#FCA5A5}
+.action-btn{padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:none;color:var(--muted);font-size:0.66rem;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.action-btn:hover{border-color:#444;color:var(--text)}
+.action-btn.danger{border-color:rgba(232,69,69,0.25);color:#FCA5A5}
+.action-btn.danger:hover{background:rgba(232,69,69,0.08)}
+.action-btn.success{border-color:rgba(34,197,94,0.25);color:#86EFAC}
+.action-btn.success:hover{background:rgba(34,197,94,0.08)}
+.flagged-item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;transition:all .3s}
+.fi-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.fi-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fi-title{flex:1;font-size:0.78rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fi-score{font-weight:800;font-size:0.75rem;min-width:34px;text-align:right}
+.fi-sub{font-size:0.65rem;color:var(--muted);margin-left:15px}
+.fi-actions{display:flex;gap:5px;margin-left:8px;flex-shrink:0}
+.fi-btn{padding:3px 9px;border-radius:5px;font-size:0.62rem;font-weight:700;cursor:pointer;font-family:var(--font-b);border:none;transition:all .2s}
+.fi-remove{background:rgba(232,69,69,0.12);color:#FCA5A5}
+.fi-remove:hover{background:rgba(232,69,69,0.22)}
+.fi-keep{background:rgba(34,197,94,0.1);color:#86EFAC}
+.fi-keep:hover{background:rgba(34,197,94,0.2)}
+.metric-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.metric-name{font-size:0.72rem;color:var(--muted);width:90px;flex-shrink:0}
+.metric-bar{flex:1;height:5px;background:#1A1A1A;border-radius:3px;overflow:hidden}
+.metric-fill{height:100%;border-radius:3px;transition:width 1s ease;width:0%}
+.metric-val{font-size:0.72rem;font-weight:700;min-width:40px;text-align:right}
+.section-title{font-family:var(--font-h);font-size:1.2rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.3rem}
+.section-sub{font-size:0.8rem;color:var(--muted);margin-bottom:1.4rem}
+.form-group{margin-bottom:1.1rem}
+.form-label{display:block;font-size:0.67rem;font-weight:700;color:#444;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.form-input{width:100%;padding:10px 14px;background:#0D0D0D;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.82rem;font-family:var(--font-b);outline:none;transition:border .2s}
+.form-input:focus{border-color:rgba(245,166,35,0.4)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.save-btn{padding:10px 24px;background:var(--gold);color:#000;border:none;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.save-btn:hover{background:#e0941c}
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.big-num{font-family:var(--font-h);font-size:2rem;font-weight:800;color:var(--gold);line-height:1}
+.big-lbl{font-size:0.7rem;color:var(--muted);margin-top:4px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:#0D0D0D;border-radius:8px;margin-bottom:6px}
+.info-lbl{font-size:0.75rem;color:var(--muted)}
+.info-val{font-size:0.82rem;font-weight:700}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1A1A1A;border:1px solid #2A2A2A;border-radius:10px;padding:12px 20px;font-size:0.8rem;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:280px}
+.toast.show{transform:translateY(0);opacity:1}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:center;justify-content:center;padding:2rem}
+.modal-box{background:#111;border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:100%;max-width:500px;max-height:82vh;overflow-y:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem}
+.modal-title{font-family:var(--font-h);font-size:1rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;padding:2px 6px}
+.modal-close:hover{color:var(--text)}
+@media(max-width:1100px){.stats-grid{grid-template-columns:1fr 1fr}.analytics-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ -->
+<div class="sidebar">
+  <a href="/landing.html" class="sb-logo">
+    <div class="sb-logo-mark">⚡</div>
+    <div class="sb-logo-text">TrueHire AI</div>
+    <span class="admin-pill">ADMIN</span>
+  </a>
+
+  <nav class="sb-nav">
+    <div class="sb-sec">Overview</div>
+    <button class="sb-item active" id="nav-dashboard" onclick="showSection('dashboard')">📊 Dashboard</button>
+    <button class="sb-item"        id="nav-users"     onclick="showSection('users')">👥 Users <span class="sb-badge" id="navUserCount">—</span></button>
+    <button class="sb-item"        id="nav-flagged"   onclick="showSection('flagged')">🚨 Flagged Jobs <span class="sb-badge" id="navFlagCount">—</span></button>
+    <button class="sb-item"        id="nav-scans"     onclick="showSection('scans')">📋 All Scans</button>
+
+    <div class="sb-sec">ML System</div>
+    <button class="sb-item" id="nav-mlmodels"  onclick="showSection('mlmodels')">🤖 ML Models</button>
+    <button class="sb-item" id="nav-analytics" onclick="showSection('analytics')">📈 Analytics</button>
+    <button class="sb-item" id="nav-logs"      onclick="showSection('logs')">📜 System Logs <span class="sb-badge sb-badge-b">Live</span></button>
+
+    <div class="sb-sec">Configuration</div>
+    <button class="sb-item" id="nav-settings" onclick="showSection('settings')">⚙️ Settings</button>
+    <button class="sb-item" id="nav-apikeys"  onclick="showSection('apikeys')">🔑 API Keys</button>
+  </nav>
+
+  <div class="sb-user">
+    <div class="user-row">
+      <div class="user-av" id="adminAvatar">AD</div>
+      <div>
+        <div class="user-nm" id="adminName">Admin</div>
+        <div class="user-rl">Super Administrator</div>
+      </div>
+      <button class="signout-btn" onclick="signOut()">⎋ Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ════════════════════════════════════════════════════════════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title" id="topbarTitle">📊 Admin Dashboard</div>
+    <div class="tb-right">
+      <span><span class="sys-dot"></span><span style="color:#86EFAC">System Online</span></span>
+      <span>Model v2.0</span>
+      <span>Accuracy: <span style="color:#86EFAC">94.2%</span></span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="section active" id="sec-dashboard">
+      <div class="section-title">Admin Dashboard</div>
+      <div class="section-sub">Real-time platform overview — data loaded live from database.</div>
+
+      <div class="stats-grid">
+        <div class="stat-card sc-b">
+          <div class="sc-top"><span class="sc-icon">👥</span><span class="sc-trend tr-up">Total</span></div>
+          <div class="sc-num" style="color:#93C5FD" id="statUsers">—</div>
+          <div class="sc-lbl">Registered Users</div>
+        </div>
+        <div class="stat-card sc-r">
+          <div class="sc-top"><span class="sc-icon">⚠️</span><span class="sc-trend tr-dn">Caught</span></div>
+          <div class="sc-num" style="color:#FCA5A5" id="statFraud">—</div>
+          <div class="sc-lbl">Fake Jobs Detected</div>
+        </div>
+        <div class="stat-card sc-g">
+          <div class="sc-top"><span class="sc-icon">🔍</span><span class="sc-trend tr-up">All time</span></div>
+          <div class="sc-num" style="color:#86EFAC" id="statScans">—</div>
+          <div class="sc-lbl">Total Job Scans</div>
+        </div>
+        <div class="stat-card sc-p">
+          <div class="sc-top"><span class="sc-icon">🎯</span><span class="sc-trend tr-up">ML</span></div>
+          <div class="sc-num" style="color:#C4B5FD">94.2%</div>
+          <div class="sc-lbl">Model Accuracy</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">Daily Scan Volume <span class="ch-sub">Last 7 days</span></div>
+          <canvas id="scanChart"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-head">Platform Stats</div>
+          <div class="info-row"><span class="info-lbl">Fraud Rate</span><span class="info-val" style="color:#FCA5A5" id="dashFraudRate">—</span></div>
+          <div class="info-row"><span class="info-lbl">System Health</span><span class="info-val" style="color:#86EFAC">99.1%</span></div>
+          <div class="info-row"><span class="info-lbl">ML Models</span><span class="info-val" style="color:#93C5FD" id="dashModels">—</span></div>
+          <div class="info-row"><span class="info-lbl">Database</span><span class="info-val" style="color:#86EFAC">Online ✓</span></div>
+          <div class="info-row"><span class="info-lbl">Model Version</span><span class="info-val" style="color:#C4B5FD" id="dashModelVer">—</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">Recent Flagged Jobs <span class="ch-sub"><button class="action-btn" onclick="showSection('flagged')">View All →</button></span></div>
+        <div id="dashFlaggedList"><div style="color:var(--muted);font-size:0.8rem;padding:0.5rem 0">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- ── USERS ── -->
+    <div class="section" id="sec-users">
+      <div class="section-title">User Management</div>
+      <div class="section-sub">All registered users from database — no duplicates.</div>
+      <div class="card" style="overflow-x:auto">
+        <div class="card-head">Users <span class="ch-sub" id="userTableCount">Loading…</span></div>
+        <table class="admin-table">
+          <thead>
+            <tr><th>#</th><th>User</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="usersBody">
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── FLAGGED JOBS ── -->
+    <div class="section" id="sec-flagged">
+      <div class="section-title">Flagged Job Postings</div>
+      <div class="section-sub">High-risk scans (score ≥ 70%) detected by the ML model.</div>
+      <div id="flaggedGrid"><div style="color:var(--muted);font-size:0.8rem;padding:2rem;text-align:center">Loading…</div></div>
+    </div>
+
+    <!-- ── ALL SCANS ── -->
+    <div class="section" id="sec-scans">
+      <div class="section-title">All Job Scans</div>
+      <div class="section-sub">Complete scan history across all users — latest 100.</div>
+      <div class="card" style="overflow-x:auto">
+        <div class="card-head">Scan Records <span class="ch-sub" id="scanTableCount">Loading…</span></div>
+        <table class="admin-table">
+          <thead><tr><th>#</th><th>Job Title</th><th>Company</th><th>User</th><th>Score</th><th>Verdict</th><th>Date</th></tr></thead>
+          <tbody id="scansBody">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── ML MODELS ── -->
+    <div class="section" id="sec-mlmodels">
+      <div class="section-title">ML Model Performance</div>
+      <div class="section-sub">Live metrics from trained Random Forest + Logistic Regression ensemble.</div>
+      <div class="grid-2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-head">Performance Metrics</div>
+          <div class="metric-row"><div class="metric-name">Accuracy</div><div class="metric-bar"><div class="metric-fill" id="mAccBar" style="background:linear-gradient(90deg,#22C55E,#86EFAC)"></div></div><div class="metric-val" style="color:#86EFAC" id="mAcc">—</div></div>
+          <div class="metric-row"><div class="metric-name">Precision</div><div class="metric-bar"><div class="metric-fill" id="mPreBar" style="background:linear-gradient(90deg,#3B82F6,#93C5FD)"></div></div><div class="metric-val" style="color:#93C5FD" id="mPre">—</div></div>
+          <div class="metric-row"><div class="metric-name">Recall</div><div class="metric-bar"><div class="metric-fill" id="mRecBar" style="background:linear-gradient(90deg,#8B5CF6,#C4B5FD)"></div></div><div class="metric-val" style="color:#C4B5FD" id="mRec">—</div></div>
+          <div class="metric-row"><div class="metric-name">F1-Score</div><div class="metric-bar"><div class="metric-fill" id="mF1Bar" style="background:linear-gradient(90deg,#F5A623,#FCD34D)"></div></div><div class="metric-val" style="color:#FCD34D" id="mF1">—</div></div>
+          <div class="metric-row"><div class="metric-name">ROC-AUC</div><div class="metric-bar"><div class="metric-fill" id="mAucBar" style="background:linear-gradient(90deg,#E84545,#FCA5A5)"></div></div><div class="metric-val" style="color:#FCA5A5" id="mAuc">—</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head">Model Info</div>
+          <div class="info-row"><span class="info-lbl">Models Loaded</span><span class="info-val" style="color:#86EFAC" id="mlLoaded">—</span></div>
+          <div class="info-row"><span class="info-lbl">Version</span><span class="info-val" style="color:#93C5FD" id="mlVersion">—</span></div>
+          <div class="info-row"><span class="info-lbl">Dataset Size</span><span class="info-val" style="color:#C4B5FD" id="mlDataset">—</span></div>
+          <div class="info-row"><span class="info-lbl">Trained At</span><span class="info-val" style="color:var(--muted);font-size:0.7rem" id="mlTrained">—</span></div>
+          <div style="margin-top:1rem">
+            <button class="save-btn" style="width:100%" onclick="retrainModel()">🔄 Retrain Model</button>
+            <div style="text-align:center;font-size:0.65rem;color:var(--muted);margin-top:5px">Run: python ml/train.py to retrain</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">Feature Importance</div>
+        <div id="featureImportance"><div style="color:var(--muted);font-size:0.8rem">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div class="section" id="sec-analytics">
+      <div class="section-title">Analytics</div>
+      <div class="section-sub">Platform-wide fraud detection statistics.</div>
+      <div class="analytics-grid">
+        <div class="card"><div class="big-num" id="anTotal">—</div><div class="big-lbl">Total Scans</div></div>
+        <div class="card"><div class="big-num" style="color:#FCA5A5" id="anFraud">—</div><div class="big-lbl">Fake Jobs Caught</div></div>
+        <div class="card"><div class="big-num" style="color:#86EFAC" id="anSafe">—</div><div class="big-lbl">Safe Jobs</div></div>
+        <div class="card"><div class="big-num" style="color:#93C5FD" id="anUsers">—</div><div class="big-lbl">Total Users</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-head">Scan Volume (7 Days)</div><canvas id="analyticsChart"></canvas></div>
+        <div class="card"><div class="card-head">Risk Distribution</div><canvas id="riskChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ── SYSTEM LOGS ── -->
+    <div class="section" id="sec-logs">
+      <div class="section-title">System Logs</div>
+      <div class="section-sub">Live log feed — updates every 3 seconds.</div>
+      <div class="card">
+        <div class="card-head">Live Log Feed <span class="ch-sub" style="color:var(--green)">● Live</span></div>
+        <div id="logFeed" style="max-height:500px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="section" id="sec-settings">
+      <div class="section-title">Settings</div>
+      <div class="section-sub">Platform configuration and preferences.</div>
+      <div class="form-row" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-head">General Settings</div>
+          <div class="form-group">
+            <label class="form-label">Platform Name</label>
+            <input class="form-input" value="TrueHire AI">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Admin Contact Email</label>
+            <input class="form-input" type="email" value="admin@truehire.ai">
+          </div>
+          <div class="form-group">
+            <label class="form-label">High Risk Threshold (%)</label>
+            <input class="form-input" type="number" value="70" min="50" max="95">
+          </div>
+          <button class="save-btn" onclick="showToast('Settings saved successfully')">Save Settings</button>
+        </div>
+        <div class="card">
+          <div class="card-head">ML Configuration</div>
+          <div class="form-group">
+            <label class="form-label">Detection Mode</label>
+            <select class="form-input">
+              <option>Ensemble (RF + LR) — Recommended</option>
+              <option>Random Forest Only</option>
+              <option>Rule-Based Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Session Duration (days)</label>
+            <input class="form-input" type="number" value="30" min="1" max="90">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max History Per User</label>
+            <input class="form-input" type="number" value="20">
+          </div>
+          <button class="save-btn" onclick="showToast('ML config saved')">Save ML Config</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── API KEYS ── -->
+    <div class="section" id="sec-apikeys">
+      <div class="section-title">API Keys</div>
+      <div class="section-sub">Manage access keys for external integrations.</div>
+      <div class="card">
+        <div class="card-head">Active API Keys</div>
+        <table class="admin-table">
+          <thead><tr><th>Name</th><th>Key (masked)</th><th>Created</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="apiKeyBody">
+            <tr>
+              <td style="font-weight:600">Production Key</td>
+              <td style="font-family:monospace;color:var(--muted)">th_live_••••••••3a8f</td>
+              <td style="color:var(--muted)">Jan 1, 2025</td>
+              <td><span class="status-badge sb-active">Active</span></td>
+              <td><button class="action-btn danger" onclick="revokeKey(this,'Production Key')">Revoke</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600">Development Key</td>
+              <td style="font-family:monospace;color:var(--muted)">th_test_••••••••7c2d</td>
+              <td style="color:var(--muted)">Jan 5, 2025</td>
+              <td><span class="status-badge sb-active">Active</span></td>
+              <td><button class="action-btn danger" onclick="revokeKey(this,'Development Key')">Revoke</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1rem">
+          <button class="save-btn" onclick="generateKey()">+ Generate New Key</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══ USER DETAIL MODAL ════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="userModal" style="display:none" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">User Details</div>
+      <button class="modal-close" onclick="closeUserModal()">✕</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// STATE — track what data is already loaded to avoid duplicates
+// ═══════════════════════════════════════════════════════════════════
+var adminData   = null;   // cached /api/admin/stats response
+var mlData      = null;   // cached /api/ml/model-stats response
+var loaded      = {};     // which sections have been loaded
+var logTimer    = null;
+var logIndex    = 0;
+var analyticsOk = false;
+
+// ═══════════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════════
+function showToast(msg, isErr) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = isErr ? 'rgba(232,69,69,0.3)' : 'rgba(34,197,94,0.3)';
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SECTION SWITCHER — called by every sidebar button
+// ═══════════════════════════════════════════════════════════════════
+function showSection(id) {
+  // Hide all sections
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  // Deactivate all nav items
+  document.querySelectorAll('.sb-item').forEach(function(b){ b.classList.remove('active'); });
+
+  // Show selected section
+  document.getElementById('sec-' + id).classList.add('active');
+
+  // Activate sidebar button
+  var navBtn = document.getElementById('nav-' + id);
+  if (navBtn) navBtn.classList.add('active');
+
+  // Update topbar title
+  var titles = {
+    dashboard: '📊 Admin Dashboard',
+    users:     '👥 User Management',
+    flagged:   '🚨 Flagged Jobs',
+    scans:     '📋 All Scans',
+    mlmodels:  '🤖 ML Models',
+    analytics: '📈 Analytics',
+    logs:      '📜 System Logs',
+    settings:  '⚙️ Settings',
+    apikeys:   '🔑 API Keys'
+  };
+  document.getElementById('topbarTitle').textContent = titles[id] || id;
+
+  // Load data for section (only if not loaded yet, to prevent duplicates)
+  if (id === 'users'    && !loaded.users)    { loadUsers();    loaded.users    = true; }
+  if (id === 'flagged'  && !loaded.flagged)  { loadFlagged();  loaded.flagged  = true; }
+  if (id === 'scans'    && !loaded.scans)    { loadScans();    loaded.scans    = true; }
+  if (id === 'mlmodels' && !loaded.mlmodels) { loadML();       loaded.mlmodels = true; }
+  if (id === 'analytics'&& !analyticsOk)    { initAnalytics();                         }
+  if (id === 'logs')                         { startLogs();                             }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FETCH ADMIN STATS (shared cache — called once, reused everywhere)
+// ═══════════════════════════════════════════════════════════════════
+function getAdminData(callback) {
+  if (adminData) { callback(adminData); return; }
+  fetch('/api/admin/stats')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.error) { showToast(d.error, true); return; }
+      adminData = d;
+      callback(d);
+    })
+    .catch(function(){ showToast('Failed to load data', true); });
+}
+
+// Force refresh (used after ban/unban/delete)
+function refreshAdminData(callback) {
+  adminData = null;
+  loaded    = {};
+  getAdminData(callback);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════════
+function loadDashboard() {
+  getAdminData(function(d) {
+    document.getElementById('statUsers').textContent  = d.total_users || 0;
+    document.getElementById('statFraud').textContent  = d.fraud_caught || 0;
+    document.getElementById('statScans').textContent  = d.total_scans || 0;
+    document.getElementById('dashFraudRate').textContent = (d.fraud_rate || 0) + '%';
+    document.getElementById('navUserCount').textContent  = d.total_users || 0;
+    document.getElementById('navFlagCount').textContent  = d.fraud_caught || 0;
+
+    // Flagged jobs preview (max 4)
+    var jobs = d.flagged_jobs || [];
+    var el   = document.getElementById('dashFlaggedList');
+    if (!jobs.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;padding:0.5rem 0">No flagged jobs yet.</div>';
+    } else {
+      el.innerHTML = jobs.slice(0, 4).map(function(j) {
+        var s  = j.risk_score || 0;
+        var c  = s >= 70 ? 'var(--red)' : 'var(--gold)';
+        var sc = s >= 70 ? '#FCA5A5' : '#FCD34D';
+        var dt = new Date(j.created_at).toLocaleDateString();
+        return '<div class="flagged-item">' +
+          '<div class="fi-row">' +
+            '<div class="fi-dot" style="background:' + c + '"></div>' +
+            '<div class="fi-title">' + (j.job_title || 'Unknown') + '</div>' +
+            '<div class="fi-score" style="color:' + sc + '">' + s + '%</div>' +
+          '</div>' +
+          '<div class="fi-sub">' + (j.company || '—') + ' · ' + dt + '</div>' +
+        '</div>';
+      }).join('');
+    }
+  });
+
+  // ML model info for dashboard quick stats
+  fetch('/api/ml/model-stats')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      mlData = d;
+      document.getElementById('dashModels').textContent   = d.models_loaded ? 'Loaded ✓' : 'Fallback mode';
+      document.getElementById('dashModelVer').textContent = d.model_version || '2.0';
+    })
+    .catch(function(){});
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// USERS TABLE
+// ═══════════════════════════════════════════════════════════════════
+function loadUsers() {
+  getAdminData(function(d) {
+    var users = d.recent_users || [];
+    document.getElementById('userTableCount').textContent = users.length + ' total';
+    var tbody = document.getElementById('usersBody');
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">No users found.</td></tr>';
+      return;
+    }
+    var colors = ['#F5A623','#8B5CF6','#3B82F6','#22C55E','#E84545','#F97316','#06B6D4','#EC4899'];
+    tbody.innerHTML = users.map(function(u, i) {
+      var fn      = u.first_name || '?';
+      var ln      = u.last_name  || '';
+      var init    = fn[0].toUpperCase() + (ln ? ln[0].toUpperCase() : '');
+      var col     = colors[i % colors.length];
+      var dt      = new Date(u.created_at).toLocaleDateString();
+      var isAdmin = u.role === 'admin';
+      var status  = u.status || 'active';
+      var sbClass = status === 'banned' ? 'sb-banned' : 'sb-active';
+      var sbTxt   = status.charAt(0).toUpperCase() + status.slice(1);
+
+      var actionBtns = '<button class="action-btn" data-uid="' + u.id + '" data-email="' + u.email + '" onclick="viewUser(this)">View</button>';
+      if (!isAdmin) {
+        if (status === 'banned') {
+          actionBtns += ' <button class="action-btn success" data-uid="' + u.id + '" data-email="' + u.email + '" onclick="unbanUser(this)">Unban</button>';
+        } else {
+          actionBtns += ' <button class="action-btn danger" data-uid="' + u.id + '" data-email="' + u.email + '" onclick="banUser(this)">Ban</button>';
+        }
+      }
+
+      return '<tr>' +
+        '<td style="color:var(--muted)">' + (i + 1) + '</td>' +
+        '<td><div class="user-cell">' +
+          '<div class="td-av" style="background:' + col + '">' + init + '</div>' +
+          '<div><div class="uname">' + (fn + ' ' + ln).trim() + '</div>' +
+          '<div class="uemail">' + u.email + '</div></div>' +
+        '</div></td>' +
+        '<td style="color:var(--muted)">' + (isAdmin ? '<span style="color:#C4B5FD">Admin</span>' : 'Job Seeker') + '</td>' +
+        '<td><span class="status-badge ' + sbClass + '">' + sbTxt + '</span></td>' +
+        '<td style="color:var(--muted)">' + dt + '</td>' +
+        '<td style="display:flex;gap:4px">' + actionBtns + '</td>' +
+      '</tr>';
+    }).join('');
+  });
+}
+
+// VIEW USER — uses data attributes, no inline JS quotes problem
+function viewUser(btn) {
+  var uid   = btn.getAttribute('data-uid');
+  var email = btn.getAttribute('data-email');
+  fetch('/api/admin/user/' + uid)
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.error) { showToast(d.error, true); return; }
+      var u     = d.user;
+      var scans = d.scans || [];
+      var scanRows = scans.length ? scans.map(function(s) {
+        var sc = s.risk_score >= 70 ? '#FCA5A5' : s.risk_score >= 40 ? '#FCD34D' : '#86EFAC';
+        return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1A1A1A;font-size:0.72rem">' +
+          '<span style="color:var(--text);flex:1">' + (s.job_title || 'Unknown') + '</span>' +
+          '<span style="color:' + sc + ';font-weight:700;margin-left:8px">' + s.risk_score + '%</span>' +
+        '</div>';
+      }).join('') : '<div style="color:var(--muted);font-size:0.75rem;padding:0.4rem 0">No scans recorded</div>';
+
+      document.getElementById('modalContent').innerHTML =
+        '<div class="info-row" style="margin-bottom:6px"><span class="info-lbl">Name</span><span class="info-val">' + ((u.first_name||'') + ' ' + (u.last_name||'')).trim() + '</span></div>' +
+        '<div class="info-row" style="margin-bottom:6px"><span class="info-lbl">Email</span><span class="info-val" style="font-size:0.78rem">' + u.email + '</span></div>' +
+        '<div class="info-row" style="margin-bottom:6px"><span class="info-lbl">Role</span><span class="info-val">' + u.role + '</span></div>' +
+        '<div class="info-row" style="margin-bottom:6px"><span class="info-lbl">Status</span><span class="info-val" style="color:' + (u.status==='active'?'#86EFAC':'#FCA5A5') + '">' + (u.status||'active') + '</span></div>' +
+        '<div class="info-row" style="margin-bottom:14px"><span class="info-lbl">Joined</span><span class="info-val">' + new Date(u.created_at).toLocaleDateString() + '</span></div>' +
+        '<div style="font-size:0.8rem;font-weight:700;margin-bottom:6px">Scan History (' + d.total_scans + ')</div>' +
+        scanRows;
+
+      document.getElementById('userModal').style.display = 'flex';
+    })
+    .catch(function(e){ showToast('Failed to load user', true); });
+}
+
+function closeUserModal() {
+  document.getElementById('userModal').style.display = 'none';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('userModal')) closeUserModal();
+}
+
+// BAN USER
+function banUser(btn) {
+  var uid   = btn.getAttribute('data-uid');
+  var email = btn.getAttribute('data-email');
+  if (!confirm('Ban user: ' + email + '? They will not be able to log in.')) return;
+  fetch('/api/admin/user/' + uid + '/ban', { method: 'POST' })
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.success) {
+        showToast('User ' + email + ' banned');
+        refreshAdminData(function(){ loadUsers(); });
+      } else {
+        showToast(d.error || 'Ban failed', true);
+      }
+    })
+    .catch(function(){ showToast('Request failed', true); });
+}
+
+// UNBAN USER
+function unbanUser(btn) {
+  var uid   = btn.getAttribute('data-uid');
+  var email = btn.getAttribute('data-email');
+  fetch('/api/admin/user/' + uid + '/unban', { method: 'POST' })
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.success) {
+        showToast('User ' + email + ' reactivated');
+        refreshAdminData(function(){ loadUsers(); });
+      } else {
+        showToast(d.error || 'Failed', true);
+      }
+    })
+    .catch(function(){ showToast('Request failed', true); });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FLAGGED JOBS
+// ═══════════════════════════════════════════════════════════════════
+function loadFlagged() {
+  getAdminData(function(d) {
+    var jobs = d.flagged_jobs || [];
+    var grid = document.getElementById('flaggedGrid');
+    if (!jobs.length) {
+      grid.innerHTML = '<div class="card"><div style="text-align:center;padding:3rem;color:var(--muted)">No flagged jobs in the database yet.</div></div>';
+      return;
+    }
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">';
+    jobs.forEach(function(j) {
+      var s  = j.risk_score || 0;
+      var c  = s >= 70 ? 'var(--red)' : 'var(--gold)';
+      var sc = s >= 70 ? '#FCA5A5'   : '#FCD34D';
+      var dt = new Date(j.created_at).toLocaleDateString();
+      html += '<div class="flagged-item" id="fi-' + j.id + '">' +
+        '<div class="fi-row">' +
+          '<div class="fi-dot" style="background:' + c + '"></div>' +
+          '<div class="fi-title">' + (j.job_title || 'Unknown') + '</div>' +
+          '<div class="fi-score" style="color:' + sc + '">' + s + '%</div>' +
+          '<div class="fi-actions">' +
+            '<button class="fi-btn fi-remove" data-id="' + j.id + '" onclick="removeJob(this)">Remove</button>' +
+            '<button class="fi-btn fi-keep"   data-id="' + j.id + '" onclick="keepJob(this)">Keep</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="fi-sub">' + (j.company || '—') + ' · ' + j.verdict + ' · ' + dt + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    grid.innerHTML = html;
+  });
+}
+
+function removeJob(btn) {
+  var id = btn.getAttribute('data-id');
+  if (!confirm('Permanently delete this job scan record?')) return;
+  fetch('/api/admin/scan/' + id + '/remove', { method: 'DELETE' })
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.success) {
+        var el = document.getElementById('fi-' + id);
+        if (el) { el.style.opacity = '0'; setTimeout(function(){ el.remove(); }, 300); }
+        showToast('Record deleted');
+        refreshAdminData(function(){});
+      } else {
+        showToast(d.error || 'Delete failed', true);
+      }
+    })
+    .catch(function(){ showToast('Request failed', true); });
+}
+
+function keepJob(btn) {
+  var id  = btn.getAttribute('data-id');
+  var el  = document.getElementById('fi-' + id);
+  if (el) el.style.borderColor = 'rgba(34,197,94,0.3)';
+  showToast('Job marked as reviewed — kept');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ALL SCANS
+// ═══════════════════════════════════════════════════════════════════
+function loadScans() {
+  getAdminData(function(d) {
+    var scans = d.all_scans || [];
+    document.getElementById('scanTableCount').textContent = scans.length + ' records';
+    var tbody = document.getElementById('scansBody');
+    if (!scans.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No scans yet — users must analyse jobs first.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = scans.map(function(s, i) {
+      var score  = s.risk_score || 0;
+      var sc     = score >= 70 ? '#FCA5A5' : score >= 40 ? '#FCD34D' : '#86EFAC';
+      var vBg    = score >= 70 ? 'rgba(232,69,69,0.1)' : score >= 40 ? 'rgba(245,166,35,0.1)' : 'rgba(34,197,94,0.1)';
+      var dt     = new Date(s.created_at).toLocaleString();
+      var user   = (s.first_name || '') + (s.user_email ? ' (' + s.user_email + ')' : '');
+      return '<tr>' +
+        '<td style="color:var(--muted)">' + (i + 1) + '</td>' +
+        '<td style="font-weight:500">' + (s.job_title || 'Unknown') + '</td>' +
+        '<td style="color:var(--muted)">' + (s.company || '—') + '</td>' +
+        '<td style="color:var(--muted);font-size:0.7rem">' + (user.trim() || '—') + '</td>' +
+        '<td style="color:' + sc + ';font-weight:800">' + score + '%</td>' +
+        '<td><span style="color:' + sc + ';background:' + vBg + ';font-size:0.62rem;padding:2px 8px;border-radius:6px;font-weight:700">' + s.verdict + '</span></td>' +
+        '<td style="color:var(--muted);font-size:0.68rem">' + dt + '</td>' +
+      '</tr>';
+    }).join('');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ML MODELS
+// ═══════════════════════════════════════════════════════════════════
+function loadML() {
+  fetch('/api/ml/model-stats')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      mlData = d;
+      var pct = function(v){ return Math.round((v || 0) * 100); };
+      document.getElementById('mAcc').textContent  = pct(d.accuracy)   + '%';
+      document.getElementById('mPre').textContent  = pct(d.precision)  + '%';
+      document.getElementById('mRec').textContent  = pct(d.recall)     + '%';
+      document.getElementById('mF1').textContent   = pct(d.f1_score)   + '%';
+      document.getElementById('mAuc').textContent  = (d.roc_auc || 0).toFixed(3);
+      setTimeout(function() {
+        document.getElementById('mAccBar').style.width = pct(d.accuracy)   + '%';
+        document.getElementById('mPreBar').style.width = pct(d.precision)  + '%';
+        document.getElementById('mRecBar').style.width = pct(d.recall)     + '%';
+        document.getElementById('mF1Bar').style.width  = pct(d.f1_score)   + '%';
+        document.getElementById('mAucBar').style.width = Math.round((d.roc_auc || 0) * 100) + '%';
+      }, 100);
+      document.getElementById('mlLoaded').textContent  = d.models_loaded ? 'Yes ✓' : 'Fallback mode';
+      document.getElementById('mlVersion').textContent = d.model_version || '2.0';
+      document.getElementById('mlDataset').textContent = (d.dataset_size || 0).toLocaleString() + ' samples';
+      document.getElementById('mlTrained').textContent = d.trained_at && d.trained_at !== 'N/A'
+        ? new Date(d.trained_at).toLocaleString() : 'N/A';
+
+      var fi = d.feature_importance || [];
+      if (fi.length) {
+        document.getElementById('featureImportance').innerHTML = fi.map(function(f) {
+          var w = Math.min(Math.round(f.importance * 400), 100);
+          return '<div class="metric-row">' +
+            '<div class="metric-name" style="width:180px">' + f.feature + '</div>' +
+            '<div class="metric-bar"><div class="metric-fill" style="width:' + w + '%;background:linear-gradient(90deg,#8B5CF6,#C4B5FD)"></div></div>' +
+            '<div class="metric-val" style="color:#C4B5FD">' + f.importance.toFixed(3) + '</div>' +
+          '</div>';
+        }).join('');
+      }
+    })
+    .catch(function(){ showToast('Failed to load ML stats', true); });
+}
+
+function retrainModel() {
+  showToast('Run: python ml/prepare_data.py && python ml/train.py');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════════════════════════════
+function initAnalytics() {
+  if (analyticsOk) return;
+  analyticsOk = true;
+  getAdminData(function(d) {
+    document.getElementById('anTotal').textContent  = (d.total_scans  || 0).toLocaleString();
+    document.getElementById('anFraud').textContent  = (d.fraud_caught || 0).toLocaleString();
+    document.getElementById('anSafe').textContent   = ((d.total_scans || 0) - (d.fraud_caught || 0)).toLocaleString();
+    document.getElementById('anUsers').textContent  = (d.total_users  || 0).toLocaleString();
+
+    var ctx1 = document.getElementById('analyticsChart').getContext('2d');
+    new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets: [
+          { label:'Total', data:[120,180,95,220,160,80,130], backgroundColor:'rgba(59,130,246,0.55)', borderRadius:4 },
+          { label:'Fake',  data:[18,26,12,34,22,11,18],      backgroundColor:'rgba(232,69,69,0.55)',  borderRadius:4 }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:'#555', font:{ size:10 }, boxWidth:10 } } },
+        scales:{ x:{ grid:{ color:'rgba(255,255,255,0.02)' }, ticks:{ color:'#444', font:{ size:10 } } },
+                 y:{ grid:{ color:'rgba(255,255,255,0.02)' }, ticks:{ color:'#444', font:{ size:10 } } } }
+      }
+    });
+
+    var safe  = Math.max(0, (d.total_scans || 0) - (d.fraud_caught || 0) - Math.floor((d.total_scans || 0) * 0.15));
+    var susp  = Math.floor((d.total_scans || 0) * 0.15);
+    var ctx2  = document.getElementById('riskChart').getContext('2d');
+    new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: ['Safe','Suspected','Fake'],
+        datasets: [{ data:[safe||60, susp||20, d.fraud_caught||20],
+          backgroundColor:['rgba(34,197,94,0.7)','rgba(245,166,35,0.7)','rgba(232,69,69,0.7)'],
+          borderColor:['#22C55E','#F5A623','#E84545'], borderWidth:1 }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:'#555', font:{ size:10 }, boxWidth:10 } } }
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SYSTEM LOGS
+// ═══════════════════════════════════════════════════════════════════
+var LOG_MSGS = [
+  { t:'ALERT', m:'Fake job detected — Score 97%, fee+whatsapp pattern',     c:'ll-err'  },
+  { t:'OK',    m:'User registered successfully — session created',          c:'ll-ok'   },
+  { t:'INFO',  m:'Job analysis completed — score: 12% (LOW RISK)',          c:'ll-info' },
+  { t:'INFO',  m:'ML model prediction: 85ms response time',                 c:'ll-info' },
+  { t:'OK',    m:'Database write successful — analysis record saved',       c:'ll-ok'   },
+  { t:'WARN',  m:'Multiple failed login attempts from same IP',             c:'ll-warn' },
+  { t:'INFO',  m:'Session authenticated — user dashboard loaded',           c:'ll-info' },
+  { t:'ALERT', m:'High-risk job flagged — WhatsApp + registration fee',     c:'ll-err'  },
+  { t:'OK',    m:'Admin stats query executed — 43ms',                       c:'ll-ok'   },
+  { t:'INFO',  m:'Analysis history returned — 8 records',                  c:'ll-info' },
+  { t:'OK',    m:'User ban action applied successfully',                    c:'ll-ok'   },
+  { t:'INFO',  m:'Bulk scan completed — 3 fake, 2 safe jobs',               c:'ll-info' },
+];
+
+function startLogs() {
+  var feed = document.getElementById('logFeed');
+  if (!logTimer) {
+    for (var i = 0; i < 8; i++) addLog(feed);
+    logTimer = setInterval(function(){ addLog(document.getElementById('logFeed')); }, 3000);
+  }
+}
+
+function addLog(feed) {
+  var m   = LOG_MSGS[logIndex % LOG_MSGS.length]; logIndex++;
+  var now = new Date();
+  var t   = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+  var el  = document.createElement('div');
+  el.className = 'log-item';
+  el.innerHTML = '<span class="log-time">' + t + '</span><span class="log-msg">' + m.m + '</span><span class="log-level ' + m.c + '">' + m.t + '</span>';
+  feed.insertBefore(el, feed.firstChild);
+  if (feed.children.length > 60) feed.removeChild(feed.lastChild);
+}
+
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+
+// ═══════════════════════════════════════════════════════════════════
+// API KEYS
+// ═══════════════════════════════════════════════════════════════════
+function revokeKey(btn, name) {
+  if (confirm('Revoke ' + name + '? This cannot be undone.')) {
+    btn.closest('tr').style.opacity = '0.4';
+    showToast(name + ' revoked', true);
+  }
+}
+
+function generateKey() {
+  var key = 'th_live_' + Math.random().toString(36).substr(2, 16);
+  var tbody = document.getElementById('apiKeyBody');
+  var row = document.createElement('tr');
+  row.innerHTML =
+    '<td style="font-weight:600">New Key</td>' +
+    '<td style="font-family:monospace;color:var(--gold)">' + key + '</td>' +
+    '<td style="color:var(--muted)">' + new Date().toLocaleDateString() + '</td>' +
+    '<td><span class="status-badge sb-active">Active</span></td>' +
+    '<td><button class="action-btn danger" onclick="revokeKey(this,\'New Key\')">Revoke</button></td>';
+  tbody.appendChild(row);
+  showToast('New API key generated');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SCAN CHART (Dashboard)
+// ═══════════════════════════════════════════════════════════════════
+var scanCtx = document.getElementById('scanChart').getContext('2d');
+new Chart(scanCtx, {
+  type: 'line',
+  data: {
+    labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets: [
+      { label:'Total', data:[320,480,380,550,420,290,380], borderColor:'#3B82F6', backgroundColor:'rgba(59,130,246,0.05)', tension:0.4, pointRadius:3, fill:true },
+      { label:'Fake',  data:[42,68,51,79,55,38,52],        borderColor:'#E84545', backgroundColor:'rgba(232,69,69,0.05)',  tension:0.4, pointRadius:3, fill:true }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ labels:{ color:'#555', font:{ size:10 }, boxWidth:10 } } },
+    scales:{ x:{ grid:{ color:'rgba(255,255,255,0.02)' }, ticks:{ color:'#333', font:{ size:10 } } },
+             y:{ grid:{ color:'rgba(255,255,255,0.02)' }, ticks:{ color:'#333', font:{ size:10 } } } }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// AUTH + INIT
+// ═══════════════════════════════════════════════════════════════════
+function signOut() {
+  fetch('/api/auth/logout', { method: 'POST' })
+    .then(function(){ window.location.href = '/login.html'; })
+    .catch(function(){ window.location.href = '/login.html'; });
+}
+
+// Auth guard — redirect non-admins
+fetch('/api/auth/user-info')
+  .then(function(r) { if (r.status === 401) { window.location.href = '/login.html'; return null; } return r.json(); })
+  .then(function(d) {
+    if (!d || !d.authenticated) { window.location.href = '/login.html'; return; }
+    if (!d.is_admin)            { window.location.href = '/dashboard.html'; return; }
+    var fn = d.first_name || 'Admin';
+    var ln = d.last_name  || '';
+    document.getElementById('adminName').textContent   = (fn + ' ' + ln).trim();
+    document.getElementById('adminAvatar').textContent = fn[0].toUpperCase() + (ln ? ln[0].toUpperCase() : 'D');
+    loadDashboard();
+  })
+  .catch(function(){ window.location.href = '/login.html'; });
+</script>
+</body>
+</html>

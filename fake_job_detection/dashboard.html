@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — TrueHire AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--gold:#F5A623;--red:#E84545;--green:#22C55E;--blue:#3B82F6;--dark:#070707;--bg:#0C0C0C;--card:#111;--border:#1E1E1E;--text:#EDEBE5;--muted:#666;--font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:var(--dark);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100}
+.sb-logo{padding:1.4rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.sb-logo-mark{width:32px;height:32px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem}
+.sb-logo-text{font-family:var(--font-h);font-size:1rem;font-weight:800}
+.sb-nav{flex:1;padding:1rem 0}
+.sb-sec{padding:0.4rem 1.2rem;font-size:0.6rem;font-weight:700;color:#333;letter-spacing:.1em;text-transform:uppercase;margin:.8rem 0 .3rem}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 1.2rem;font-size:0.82rem;color:var(--muted);text-decoration:none;transition:all .15s;border-left:2px solid transparent}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+.sb-item.active{color:var(--gold);background:rgba(245,166,35,0.06);border-left-color:var(--gold)}
+.sb-user{padding:1rem 1.2rem;border-top:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:10px}
+.user-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E84545);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:#000;flex-shrink:0}
+.user-nm{font-size:0.8rem;font-weight:600;line-height:1.2}
+.user-rl{font-size:0.65rem;color:var(--muted)}
+.logout-btn{margin-left:auto;font-size:0.7rem;color:var(--muted);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:none;font-family:var(--font-b);transition:all .2s}
+.logout-btn:hover{color:var(--red);border-color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--dark);border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:var(--font-h);font-size:1rem;font-weight:700}
+.content{padding:2rem;flex:1}
+.welcome-bar{background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(245,166,35,0.02));border:1px solid rgba(245,166,35,0.15);border-radius:14px;padding:1.4rem 2rem;margin-bottom:1.8rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.wb-left h2{font-family:var(--font-h);font-size:1.25rem;font-weight:700;letter-spacing:-0.02em}
+.wb-left p{font-size:0.82rem;color:var(--muted);margin-top:4px}
+.wb-actions{display:flex;gap:8px;flex-shrink:0}
+.btn-sm{padding:8px 18px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;border:none;font-family:var(--font-b);text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:#e0941c;color:#000}
+.btn-outline-sm{background:none;border:1px solid var(--border);color:var(--muted)}.btn-outline-sm:hover{border-color:#444;color:var(--text)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:1.5rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.3rem;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sc-gold::before{background:var(--gold)}.sc-red::before{background:var(--red)}.sc-blue::before{background:var(--blue)}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem}
+.sc-icon{font-size:1.1rem}
+.sc-trend{font-size:0.65rem;padding:2px 8px;border-radius:6px;font-weight:700}
+.trend-up{background:rgba(34,197,94,0.1);color:#86EFAC}.trend-down{background:rgba(232,69,69,0.1);color:#FCA5A5}
+.sc-num{font-family:var(--font-h);font-size:2rem;font-weight:800;line-height:1;margin-bottom:3px}
+.sc-label{font-size:0.7rem;color:var(--muted)}
+.grid-2{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem}
+.card-title{font-family:var(--font-h);font-size:0.88rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.ct-link{font-size:0.7rem;color:var(--gold);font-family:var(--font-b);font-weight:400;text-decoration:none}.ct-link:hover{opacity:.75}
+.rt-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid #141414;gap:10px;font-size:0.78rem}
+.rt-row:last-child{border:none}
+.rt-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rt-title{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rt-company{font-size:0.67rem;color:var(--muted);margin-top:1px}
+.rt-score{font-weight:700;font-size:0.78rem;min-width:38px;text-align:right}
+.rt-badge{font-size:0.6rem;padding:2px 8px;border-radius:6px;font-weight:700;flex-shrink:0}
+.rb-danger{background:rgba(232,69,69,0.12);color:#FCA5A5}.rb-warn{background:rgba(245,166,35,0.12);color:#FCD34D}.rb-safe{background:rgba(34,197,94,0.12);color:#86EFAC}
+.empty-state{text-align:center;padding:2rem 1rem;color:var(--muted);font-size:0.82rem;line-height:1.8}
+.empty-state a{color:var(--gold);text-decoration:none;font-weight:600}
+.act-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #141414;align-items:flex-start}
+.act-item:last-child{border:none}
+.act-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0}
+.ai-red{background:rgba(232,69,69,0.1)}.ai-blue{background:rgba(59,130,246,0.1)}.ai-green{background:rgba(34,197,94,0.1)}.ai-gold{background:rgba(245,166,35,0.1)}
+.act-title{font-size:0.78rem;font-weight:500;color:var(--text);margin-bottom:2px}
+.act-time{font-size:0.65rem;color:#444}
+.tip-box{background:rgba(245,166,35,0.04);border:1px solid rgba(245,166,35,0.12);border-radius:10px;padding:1rem;text-align:center;margin-top:1rem}
+.tip-box p{font-size:0.8rem;color:var(--muted);margin-bottom:0.8rem;line-height:1.6}
+canvas{max-height:160px}
+
+/* ── Recommended jobs strip ── */
+.rec-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.rec-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem;transition:all .2s;display:flex;flex-direction:column;gap:8px}
+.rec-card:hover{border-color:#2A2A2A;transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,0.3)}
+.rc-top{display:flex;align-items:center;gap:10px}
+.rc-logo{width:36px;height:36px;border-radius:9px;background:#181818;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.rc-title{font-family:var(--font-h);font-size:0.82rem;font-weight:700;line-height:1.3}
+.rc-company{font-size:0.7rem;color:var(--muted)}
+.rc-tags{display:flex;flex-wrap:wrap;gap:5px}
+.rc-tag{font-size:0.6rem;padding:2px 8px;background:#181818;border:1px solid var(--border);border-radius:5px;color:var(--muted)}
+.rc-tag-gold{background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.2);color:var(--gold)}
+.rc-footer{display:flex;align-items:center;justify-content:space-between}
+.rc-salary{font-size:0.75rem;font-weight:700;color:var(--gold)}
+.rc-match{font-size:0.62rem;padding:2px 8px;background:rgba(34,197,94,0.1);color:#86EFAC;border-radius:6px;font-weight:700}
+.rc-apply{padding:5px 14px;background:var(--gold);color:#000;border:none;border-radius:7px;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:var(--font-b);text-decoration:none;display:inline-flex;align-items:center;transition:all .2s}
+.rc-apply:hover{background:#e0941c;color:#000}
+.rc-verified{font-size:0.58rem;padding:2px 7px;background:rgba(34,197,94,0.1);color:#86EFAC;border:1px solid rgba(34,197,94,0.2);border-radius:8px;font-weight:700}
+
+@media(max-width:1100px){.stats-grid{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}.rec-strip{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.rec-strip{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/landing.html" class="sb-logo">
+    <div class="sb-logo-mark">🛡️</div>
+    <div class="sb-logo-text">TrueHire AI</div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-sec">Navigation</div>
+    <a href="/dashboard.html" class="sb-item active">📊 Overview</a>
+    <a href="/detector.html"  class="sb-item">🛡️ Job Detector</a>
+    <a href="/recommend.html" class="sb-item">💼 Job Matches</a>
+  </nav>
+  <div class="sb-user">
+    <div class="user-row">
+      <div class="user-av" id="sideAvatar">?</div>
+      <div>
+        <div class="user-nm" id="sideName">Loading…</div>
+        <div class="user-rl" id="sideRole">Job Seeker</div>
+      </div>
+      <button class="logout-btn" onclick="signOut()">⎋</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Dashboard</div>
+    <div style="font-size:0.78rem;color:var(--muted)">TrueHire AI — Fake Job Detection</div>
+  </div>
+
+  <div class="content">
+
+    <!-- WELCOME -->
+    <div class="welcome-bar">
+      <div class="wb-left">
+        <h2 id="welcomeMsg">Welcome 👋</h2>
+        <p  id="welcomeSub">Loading your stats…</p>
+      </div>
+      <div class="wb-actions">
+        <a href="/detector.html" class="btn-sm btn-outline-sm">🛡️ Scan a Job</a>
+        <a href="/recommend.html" class="btn-sm btn-gold">View All Jobs →</a>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card sc-gold">
+        <div class="sc-top"><span class="sc-icon">🔍</span><span class="sc-trend trend-up">Total</span></div>
+        <div class="sc-num" id="statTotal">—</div>
+        <div class="sc-label">Jobs Scanned</div>
+      </div>
+      <div class="stat-card sc-red">
+        <div class="sc-top"><span class="sc-icon">⚠️</span><span class="sc-trend trend-down">Blocked</span></div>
+        <div class="sc-num" id="statFake" style="color:#FCA5A5">—</div>
+        <div class="sc-label">Fake Jobs Caught</div>
+      </div>
+      <div class="stat-card sc-blue">
+        <div class="sc-top"><span class="sc-icon">✅</span><span class="sc-trend trend-up">Safe</span></div>
+        <div class="sc-num" id="statSafe" style="color:#93C5FD">—</div>
+        <div class="sc-label">Legitimate Jobs</div>
+      </div>
+    </div>
+
+    <!-- TOP RECOMMENDED JOBS -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">
+        💼 Top Job Recommendations
+        <a href="/recommend.html" class="ct-link">View All 15 Jobs →</a>
+      </div>
+      <div class="rec-strip" id="recStrip">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- RECENT SCANS + CHART -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">
+          Recent Fraud Analyses
+          <a href="/detector.html" class="ct-link">+ Scan New Job</a>
+        </div>
+        <div id="historyTable">
+          <div class="empty-state">
+            No scans yet.<br>
+            <a href="/detector.html">Go to Job Detector →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Weekly Scan Overview</div>
+        <canvas id="scanChart"></canvas>
+        <div class="tip-box">
+          <p>Paste any job description into the <strong style="color:var(--gold)">Job Detector</strong> to instantly check if it is a scam.</p>
+          <a href="/detector.html" class="btn-sm btn-gold" style="display:inline-flex;margin-top:.3rem">🛡️ Open Detector</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <div id="activityFeed">
+        <div class="act-item">
+          <div class="act-icon ai-blue">🛡️</div>
+          <div><div class="act-title">Welcome to TrueHire AI! Start by scanning a job posting.</div><div class="act-time">Now</div></div>
+        </div>
+        <div class="act-item">
+          <div class="act-icon ai-green">💼</div>
+          <div><div class="act-title">Browse verified job recommendations in Job Matches.</div><div class="act-time">Tip</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Top 3 recommended jobs (same data as recommend.html) ──────────────────
+var TOP_JOBS = [
+  {id:1, logo:'🐍', title:'Senior Python Developer', company:'Zoho Corporation',
+   location:'Chennai, TN', salary:'₹12–18 LPA', match:94,
+   skills:['Python','Django','REST APIs'],
+   email:'careers@zoho.com', type:'Full-Time'},
+  {id:2, logo:'🤖', title:'ML Engineer', company:'Freshworks',
+   location:'Bangalore, KA', salary:'₹15–22 LPA', match:89,
+   skills:['Python','TensorFlow','MLOps'],
+   email:'ml-jobs@freshworks.com', type:'Full-Time'},
+  {id:3, logo:'📊', title:'Data Analyst', company:'Infosys',
+   location:'Pune, MH', salary:'₹6–10 LPA', match:82,
+   skills:['SQL','Python','Power BI'],
+   email:'analyst@infosys.com', type:'Full-Time'},
+  {id:4, logo:'⚛️', title:'React Developer', company:'Razorpay',
+   location:'Bangalore, KA', salary:'₹10–16 LPA', match:78,
+   skills:['React','TypeScript','Node.js'],
+   email:'frontend@razorpay.com', type:'Full-Time'},
+  {id:5, logo:'🎨', title:'UI/UX Designer', company:'Swiggy',
+   location:'Bangalore, KA', salary:'₹8–14 LPA', match:74,
+   skills:['Figma','Prototyping','User Research'],
+   email:'design@swiggy.in', type:'Full-Time'},
+  {id:6, logo:'📱', title:'Data Science Intern', company:'Paytm',
+   location:'Noida, UP', salary:'₹20–30K/month', match:71,
+   skills:['Python','Statistics','ML basics'],
+   email:'internships@paytm.com', type:'Internship'},
+];
+
+function renderRecommendations() {
+  var strip = document.getElementById('recStrip');
+  var jobs  = TOP_JOBS.slice(0, 3); // show top 3 on dashboard
+  var mc    = function(m){ return m>=80?'#22C55E':m>=60?'#F5A623':'#3B82F6'; };
+
+  strip.innerHTML = jobs.map(function(j) {
+    var tags = j.skills.map(function(s){
+      return '<span class="rc-tag">'+s+'</span>';
+    }).join('') + '<span class="rc-tag rc-tag-gold">'+j.type+'</span>';
+
+    var subjectLine = encodeURIComponent('Application for ' + j.title);
+    var bodyLine    = encodeURIComponent(
+      'Dear Hiring Team,\r\n\r\nI am interested in the ' + j.title +
+      ' position at ' + j.company + '.\r\n\r\nPlease find my resume attached.\r\n\r\nRegards');
+
+    return '<div class="rec-card">'+
+      '<div class="rc-top">'+
+        '<div class="rc-logo">'+j.logo+'</div>'+
+        '<div>'+
+          '<div class="rc-title">'+j.title+'</div>'+
+          '<div class="rc-company">'+j.company+' &bull; '+j.location+'</div>'+
+        '</div>'+
+        '<div class="rc-verified">\u2713 Verified</div>'+
+      '</div>'+
+      '<div class="rc-tags">'+tags+'</div>'+
+      '<div class="rc-footer">'+
+        '<div>'+
+          '<div class="rc-salary">'+j.salary+'</div>'+
+          '<div style="font-size:0.62rem;color:var(--muted);margin-top:2px">'+
+            'Match: <span style="color:'+mc(j.match)+';font-weight:700">'+j.match+'%</span>'+
+          '</div>'+
+        '</div>'+
+        '<a class="rc-apply" href="mailto:'+j.email+
+          '?subject='+subjectLine+'&body='+bodyLine+'">Apply \u2192</a>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── Load user ──────────────────────────────────────────────────────────────
+function loadUser() {
+  fetch('/api/auth/user')
+    .then(function(r){
+      if(r.status===401){window.location.href='/login.html';return null;}
+      return r.json();
+    })
+    .then(function(data){
+      if(!data||!data.authenticated){window.location.href='/login.html';return;}
+      var fn=data.first_name||'there', ln=data.last_name||'';
+      var hour=new Date().getHours();
+      var greet=hour<12?'Good Morning':hour<17?'Good Afternoon':'Good Evening';
+      document.getElementById('welcomeMsg').textContent = greet+', '+fn+' \uD83D\uDC4B';
+      document.getElementById('sideName').textContent   = fn+' '+ln;
+      document.getElementById('sideRole').textContent   = data.role==='admin'?'Administrator':'Job Seeker';
+      document.getElementById('sideAvatar').textContent = (fn[0]||'?').toUpperCase()+(ln[0]||'').toUpperCase();
+    })
+    .catch(function(){window.location.href='/login.html';});
+}
+
+// ── Live stats ─────────────────────────────────────────────────────────────
+function loadStats() {
+  fetch('/api/dashboard/stats')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.error) return;
+      document.getElementById('statTotal').textContent = d.total_scanned;
+      document.getElementById('statFake').textContent  = d.fake_caught;
+      document.getElementById('statSafe').textContent  = d.safe_jobs;
+      var sub = d.total_scanned===0
+        ? 'No scans yet — use Job Detector to scan your first job!'
+        : d.fake_caught+' fake job'+(d.fake_caught!==1?'s':'')+' caught from '+d.total_scanned+' scanned.';
+      document.getElementById('welcomeSub').textContent = sub;
+    })
+    .catch(function(){});
+}
+
+// ── Scan history ───────────────────────────────────────────────────────────
+function loadHistory() {
+  fetch('/api/analysis/history')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var table = document.getElementById('historyTable');
+      if(!d.analyses||!d.analyses.length){
+        table.innerHTML='<div class="empty-state">No scans yet.<br><a href="/detector.html">Go to Job Detector \u2192</a></div>';
+        return;
+      }
+      table.innerHTML = d.analyses.slice(0,6).map(function(a){
+        var s   = a.risk_score||0;
+        var dot = s>=70?'var(--red)':s>=40?'var(--gold)':'var(--green)';
+        var bc  = s>=70?'rb-danger':s>=40?'rb-warn':'rb-safe';
+        var bt  = s>=70?'FAKE':s>=40?'SUSPECT':'SAFE \u2713';
+        var sc  = s>=70?'#FCA5A5':s>=40?'#FCD34D':'#86EFAC';
+        var dt  = new Date(a.created_at).toLocaleDateString();
+        return '<div class="rt-row">'+
+          '<div class="rt-dot" style="background:'+dot+'"></div>'+
+          '<div style="flex:1">'+
+            '<div class="rt-title">'+(a.job_title||'Unknown Job')+'</div>'+
+            '<div class="rt-company">'+(a.company||'')+' \u00B7 '+dt+'</div>'+
+          '</div>'+
+          '<div class="rt-score" style="color:'+sc+'">'+s+'%</div>'+
+          '<div class="rt-badge '+bc+'">'+bt+'</div>'+
+        '</div>';
+      }).join('');
+
+      // Update activity feed from real data
+      var feed = document.getElementById('activityFeed');
+      feed.innerHTML = d.analyses.slice(0,4).map(function(a){
+        var s  = a.risk_score||0;
+        var ic = s>=70?'ai-red':'ai-green';
+        var em = s>=70?'\uD83D\uDEE1\uFE0F':'\u2705';
+        var msg = s>=70
+          ? 'Caught fake job: '+(a.job_title||'Unknown')+' ('+s+'%)'
+          : 'Safe job verified: '+(a.job_title||'Unknown')+' ('+s+'%)';
+        var dt = new Date(a.created_at).toLocaleDateString();
+        return '<div class="act-item">'+
+          '<div class="act-icon '+ic+'">'+em+'</div>'+
+          '<div><div class="act-title">'+msg+'</div><div class="act-time">'+dt+'</div></div>'+
+        '</div>';
+      }).join('');
+    })
+    .catch(function(){});
+}
+
+// ── Chart ──────────────────────────────────────────────────────────────────
+var ctx = document.getElementById('scanChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets: [
+      {label:'Safe',data:[8,12,6,15,9,4,7], backgroundColor:'rgba(34,197,94,0.55)',  borderRadius:4},
+      {label:'Fake',data:[2,1,3,4,1,2,0],   backgroundColor:'rgba(232,69,69,0.55)',  borderRadius:4}
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#555',font:{size:10},boxWidth:10}}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.02)'},ticks:{color:'#444',font:{size:10}}},
+      y:{grid:{color:'rgba(255,255,255,0.02)'},ticks:{color:'#444',font:{size:10}}}
+    }
+  }
+});
+
+// ── Sign out ───────────────────────────────────────────────────────────────
+function signOut() {
+  fetch('/api/auth/logout',{method:'POST'})
+    .then(function(){window.location.href='/login.html';})
+    .catch(function(){window.location.href='/login.html';});
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadUser();
+loadStats();
+loadHistory();
+renderRecommendations();
+</script>
+</body>
+</html>

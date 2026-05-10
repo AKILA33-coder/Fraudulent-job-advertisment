@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — TrueHire AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#F5A623;--red:#E84545;--green:#22C55E;--dark:#060606;--card:#101010;--border:#1E1E1E;--text:#EDEBE5;--muted:#666;--font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-b);background:var(--dark);color:var(--text);min-height:100vh;display:flex;overflow:hidden}
+.auth-left{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem}
+.al-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0A0800 0%,#110D00 50%,#0D0A00 100%)}
+.al-glow{position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(ellipse,rgba(245,166,35,0.12) 0%,transparent 65%);pointer-events:none}
+.al-glow2{position:absolute;bottom:-150px;left:-50px;width:400px;height:400px;background:radial-gradient(ellipse,rgba(245,166,35,0.06) 0%,transparent 65%);pointer-events:none}
+.al-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(245,166,35,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(245,166,35,0.04) 1px,transparent 1px);background-size:50px 50px}
+.al-content{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:space-between;height:100%}
+.al-logo{font-family:var(--font-h);font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-mark{width:36px;height:36px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.al-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:3rem 0}
+.al-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:20px;font-size:0.68rem;font-weight:700;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.5rem}
+.al-title{font-family:var(--font-h);font-size:2.4rem;font-weight:800;letter-spacing:-0.03em;line-height:1.1;margin-bottom:1rem}
+.al-title span{color:var(--gold)}
+.al-sub{font-size:0.9rem;color:var(--muted);line-height:1.7;max-width:360px}
+.al-features{margin-top:2.5rem;display:flex;flex-direction:column;gap:12px}
+.af-item{display:flex;align-items:center;gap:12px;font-size:0.82rem;color:#888}
+.af-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0}
+.af-1{background:rgba(232,69,69,0.12);border:1px solid rgba(232,69,69,0.2)}
+.af-2{background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2)}
+.af-3{background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2)}
+.al-stats{display:flex;gap:2rem;padding-top:1.5rem;border-top:1px solid #1A1A1A}
+.als{font-size:0.72rem;color:var(--muted)}
+.als strong{font-family:var(--font-h);font-size:1.1rem;font-weight:800;color:var(--gold);display:block;line-height:1.2}
+
+/* RIGHT SIDE */
+.auth-right{width:480px;flex-shrink:0;background:#0A0A0A;border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:3rem 2.5rem;position:relative;overflow-y:auto}
+.ar-top{text-align:center;margin-bottom:2.5rem}
+.ar-welcome{font-family:var(--font-h);font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.3rem}
+.ar-sub{font-size:0.82rem;color:var(--muted)}
+.tab-group{display:flex;background:#141414;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:2rem}
+.tab-btn{flex:1;padding:8px;font-size:0.8rem;font-weight:600;border:none;background:none;color:var(--muted);cursor:pointer;border-radius:8px;transition:all .2s;font-family:var(--font-b)}
+.tab-btn.active{background:#1E1E1E;color:var(--text)}
+.form-section{display:none}.form-section.active{display:block}
+.form-group{margin-bottom:1.2rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-label{display:block;font-size:0.68rem;font-weight:700;color:#555;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.form-input{width:100%;padding:11px 14px;background:#141414;border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:0.85rem;font-family:var(--font-b);outline:none;transition:all .2s}
+.form-input:focus{border-color:rgba(245,166,35,0.5);background:#181818}
+.form-input::placeholder{color:#333}
+.form-input-icon{position:relative}
+.form-input-icon input{padding-right:40px}
+.fi-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.9rem;cursor:pointer;color:#444}
+.remember-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.check-label{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--muted);cursor:pointer}
+.check-label input{accent-color:var(--gold)}
+.forgot-link{font-size:0.78rem;color:var(--gold);text-decoration:none;transition:opacity .2s}
+.forgot-link:hover{opacity:.7}
+.btn-submit{width:100%;padding:13px;background:var(--gold);color:#000;font-weight:800;font-size:0.88rem;border:none;border-radius:10px;cursor:pointer;font-family:var(--font-h);letter-spacing:0.02em;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-submit:hover{background:#e0941c;transform:translateY(-1px);box-shadow:0 8px 24px rgba(245,166,35,0.2)}
+.divider-or{display:flex;align-items:center;gap:12px;margin:1.5rem 0;font-size:0.72rem;color:#333}
+.divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:#1E1E1E}
+.social-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.social-btn{padding:10px;background:#141414;border:1px solid var(--border);border-radius:9px;color:#888;font-size:0.78rem;cursor:pointer;font-family:var(--font-b);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
+.social-btn:hover{background:#1E1E1E;color:var(--text);border-color:#333}
+.auth-footer{margin-top:1.5rem;text-align:center;font-size:0.75rem;color:#444}
+.auth-footer a{color:var(--gold);text-decoration:none}
+.strength-bar{height:3px;background:#1A1A1A;border-radius:2px;margin-top:6px;overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;transition:all .3s}
+.strength-label{font-size:0.62rem;margin-top:4px}
+.select-wrap select{width:100%;padding:11px 14px;background:#141414;border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:0.85rem;font-family:var(--font-b);outline:none;appearance:none;cursor:pointer}
+.select-wrap select:focus{border-color:rgba(245,166,35,0.5)}
+
+@media(max-width:768px){.auth-left{display:none}.auth-right{width:100%;border-left:none;padding:2rem 1.5rem}}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="auth-left">
+  <div class="al-bg"></div>
+  <div class="al-glow"></div>
+  <div class="al-glow2"></div>
+  <div class="al-grid"></div>
+  <div class="al-content">
+    <a href="/landing.html" class="al-logo">
+      <div class="logo-mark">🛡️</div>TrueHire AI
+    </a>
+    <div class="al-hero">
+      <div class="al-tag">🔐 Secure Access</div>
+      <div class="al-title">Your <span>Career</span><br>Shield Awaits</div>
+      <div class="al-sub">Detect fake jobs instantly, get personalized job recommendations, and build your skill roadmap — all powered by AI.</div>
+      <div class="al-features">
+        <div class="af-item"><div class="af-icon af-1">🛡️</div>AI fraud detection with 94.2% accuracy</div>
+        <div class="af-item"><div class="af-icon af-2">💼</div>Personalized job matches from verified listings</div>
+        <div class="af-item"><div class="af-icon af-3">🎯</div>Custom learning paths for your dream job</div>
+      </div>
+    </div>
+    <div class="al-stats">
+      <div class="als"><strong>18K+</strong>Scams Caught</div>
+      <div class="als"><strong>2.4M+</strong>Jobs Scanned</div>
+      <div class="als"><strong>Free</strong>Always</div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="auth-right">
+  <div class="ar-top">
+    <div class="ar-welcome">Welcome Back</div>
+    <div class="ar-sub">Sign in to your TrueHire AI account</div>
+  </div>
+
+  <div class="tab-group">
+    <button class="tab-btn active" onclick="switchTab('login',this)">Sign In</button>
+    <button class="tab-btn" onclick="switchTab('register',this)">Create Account</button>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <div class="form-section active" id="form-login">
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" id="loginEmail" class="form-input" placeholder="you@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="form-input-icon">
+        <input type="password" class="form-input" id="loginPass" placeholder="Enter your password">
+        <span class="fi-icon" onclick="togglePass('loginPass',this)">👁️</span>
+      </div>
+    </div>
+    <div class="remember-row">
+      <label class="check-label"><input type="checkbox" checked> Remember me</label>
+      <a href="#" class="forgot-link">Forgot password?</a>
+    </div>
+    <button class="btn-submit" onclick="loginUser()">Sign In →</button>
+    <div class="divider-or">or continue with</div>
+    <div class="social-grid">
+      <button class="social-btn">🔵 Google</button>
+      <button class="social-btn">⬛ GitHub</button>
+    </div>
+    <div class="auth-footer">Don't have an account? <a href="#" onclick="switchTab('register',document.querySelectorAll('.tab-btn')[1])">Register free →</a></div>
+  </div>
+
+  <!-- REGISTER FORM -->
+  <div class="form-section" id="form-register">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input type="text" id="regFirstName" class="form-input" placeholder="Raja">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input type="text" id="regLastName" class="form-input" placeholder="Kumar">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" id="regEmail" class="form-input" placeholder="you@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Account Type</label>
+      <div class="select-wrap">
+        <select id="userType" onchange="updateUI()">
+          <option value="jobseeker">Job Seeker (Regular User)</option>
+          <option value="admin">Admin Dashboard</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" id="jobRoleField">
+      <label class="form-label">Job Seeking Role</label>
+      <div class="select-wrap">
+        <select>
+          <option>Software Developer</option>
+          <option>Data Scientist / Analyst</option>
+          <option>Machine Learning Engineer</option>
+          <option>Business Analyst</option>
+          <option>UI/UX Designer</option>
+          <option>DevOps / Cloud Engineer</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="form-input-icon">
+        <input type="password" class="form-input" id="regPass" placeholder="Min 8 characters" oninput="checkStrength(this.value)">
+        <span class="fi-icon" onclick="togglePass('regPass',this)">👁️</span>
+      </div>
+      <div class="strength-bar"><div class="strength-fill" id="strengthBar" style="width:0%;background:var(--red)"></div></div>
+      <div class="strength-label" id="strengthLabel" style="color:var(--muted)">Enter a password</div>
+    </div>
+    <div class="form-group">
+      <label class="check-label" style="font-size:0.75rem;color:var(--muted)">
+        <input type="checkbox"> I agree to the <a href="#" style="color:var(--gold)">Terms of Service</a> and <a href="#" style="color:var(--gold)">Privacy Policy</a>
+      </label>
+    </div>
+    <button class="btn-submit" onclick="registerUser()">Create Free Account →</button>
+    <div class="divider-or">or</div>
+    <div class="social-grid">
+      <button class="social-btn">🔵 Google</button>
+      <button class="social-btn">⬛ GitHub</button>
+    </div>
+    <div class="auth-footer">Already have an account? <a href="#" onclick="switchTab('login',document.querySelectorAll('.tab-btn')[0])">Sign in →</a></div>
+  </div>
+</div>
+
+<script>
+/* ── UI helpers ── */
+function showError(msg){
+  let el = document.getElementById('authError');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'authError';
+    el.style.cssText = 'background:rgba(232,69,69,0.12);border:1px solid rgba(232,69,69,0.3);color:#FCA5A5;padding:10px 14px;border-radius:9px;font-size:0.8rem;margin-bottom:1rem;display:none';
+    document.querySelector('.auth-right').insertBefore(el, document.querySelector('.tab-group'));
+  }
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(()=>el.style.display='none', 5000);
+}
+
+function setLoading(btn, loading){
+  btn.disabled = loading;
+  btn.style.opacity = loading ? '0.7' : '1';
+  btn.textContent = loading ? '⏳ Please wait...' : btn.dataset.label;
+}
+
+function switchTab(tab, btn){
+  document.querySelectorAll('.form-section').forEach(f=>f.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('form-'+tab).classList.add('active');
+  btn.classList.add('active');
+  document.querySelector('.ar-welcome').textContent = tab==='login'?'Welcome Back':'Create Account';
+  document.querySelector('.ar-sub').textContent = tab==='login'?'Sign in to your TrueHire AI account':'Join 18,000+ smart job seekers today';
+  const e = document.getElementById('authError');
+  if(e) e.style.display='none';
+}
+
+function togglePass(id,btn){
+  const inp = document.getElementById(id);
+  inp.type = inp.type==='password'?'text':'password';
+  btn.textContent = inp.type==='password'?'👁️':'🔒';
+}
+
+function checkStrength(v){
+  const bar = document.getElementById('strengthBar');
+  const lbl = document.getElementById('strengthLabel');
+  let score = 0;
+  if(v.length>=8) score++;
+  if(/[A-Z]/.test(v)) score++;
+  if(/[0-9]/.test(v)) score++;
+  if(/[^A-Za-z0-9]/.test(v)) score++;
+  const configs = [
+    {w:'0%',c:'var(--red)',t:'Too weak'},
+    {w:'25%',c:'var(--red)',t:'Weak'},
+    {w:'50%',c:'var(--gold)',t:'Fair'},
+    {w:'75%',c:'#60a5fa',t:'Strong'},
+    {w:'100%',c:'var(--green)',t:'Very strong 💪'}
+  ];
+  const cfg = configs[score];
+  bar.style.width=cfg.w; bar.style.background=cfg.c;
+  lbl.textContent=cfg.t; lbl.style.color=cfg.c;
+}
+
+function updateUI(){
+  const userType = document.getElementById('userType').value;
+  const jobRoleField = document.getElementById('jobRoleField');
+  if(jobRoleField) jobRoleField.style.display = userType==='admin'?'none':'block';
+}
+
+/* ── REGISTER ── */
+function registerUser(){
+  const btn       = document.querySelector('#form-register .btn-submit');
+  btn.dataset.label = btn.dataset.label || btn.textContent;
+  const userType  = document.getElementById('userType').value;
+  const firstName = document.getElementById('regFirstName').value.trim();
+  const lastName  = document.getElementById('regLastName').value.trim();
+  const email     = document.getElementById('regEmail').value.trim();
+  const password  = document.getElementById('regPass').value;
+
+  if(!firstName || !lastName || !email || !password){
+    showError('Please fill in all fields before continuing.'); return;
+  }
+  if(password.length < 6){
+    showError('Password must be at least 6 characters.'); return;
+  }
+
+  setLoading(btn, true);
+
+  fetch('/api/auth/register', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({first_name:firstName, last_name:lastName,
+                          email:email, password:password, user_type:userType})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.success){
+      // Use absolute paths — prevents redirect failures
+      window.location.href = data.user_type==='admin' ? '/admin.html' : '/dashboard.html';
+    } else {
+      setLoading(btn, false);
+      showError(data.error || 'Registration failed. Please try again.');
+    }
+  })
+  .catch(e => { setLoading(btn,false); showError('Connection error. Is the server running?'); });
+}
+
+/* ── LOGIN ── */
+function loginUser(){
+  const btn = document.querySelector('#form-login .btn-submit');
+  btn.dataset.label = btn.dataset.label || btn.textContent;
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+
+  if(!email || !password){
+    showError('Please enter your email and password.'); return;
+  }
+
+  setLoading(btn, true);
+
+  fetch('/api/auth/login', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email, password})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.success){
+      // Absolute paths — correct redirect after login
+      window.location.href = data.user_type==='admin' ? '/admin.html' : '/dashboard.html';
+    } else {
+      setLoading(btn, false);
+      showError(data.error || 'Login failed. Please check your credentials.');
+    }
+  })
+  .catch(e => { setLoading(btn,false); showError('Connection error. Is the server running?'); });
+}
+
+document.addEventListener('DOMContentLoaded', updateUI);
+</script>
+</body>
+</html>

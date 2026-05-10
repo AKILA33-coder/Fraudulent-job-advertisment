@@ -1,0 +1,54 @@
+{
+  "trained_at": "2026-04-17T20:27:49.531816",
+  "model_version": "2.0",
+  "models": [
+    "RandomForest",
+    "ExtraTrees",
+    "LogisticRegression"
+  ],
+  "ensemble_weights": {
+    "extra_trees": 0.4,
+    "random_forest": 0.35,
+    "logistic_regression": 0.25
+  },
+  "dataset_size": 10000,
+  "results": {
+    "random_forest": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0
+    },
+    "extra_trees": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0
+    },
+    "logistic_regression": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0
+    },
+    "ensemble": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0
+    }
+  },
+  "features": [
+    "has_fee",
+    "has_urgency",
+    "has_whatsapp",
+    "no_email",
+    "excessive_exclamation",
+    "text_length",
+    "has_salary"
+  ]
+}

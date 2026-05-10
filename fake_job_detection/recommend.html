@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Matches — TrueHire AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#F5A623;--red:#E84545;--green:#22C55E;--blue:#3B82F6;--dark:#070707;--bg:#0C0C0C;--card:#111;--border:#1E1E1E;--text:#EDEBE5;--muted:#666;--font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:var(--dark);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0}
+.sb-logo{padding:1.4rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.sb-logo-mark{width:32px;height:32px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem}
+.sb-logo-text{font-family:var(--font-h);font-size:1rem;font-weight:800}
+.sb-nav{flex:1;padding:1rem 0}
+.sb-section{padding:0.4rem 1.2rem;font-size:0.6rem;font-weight:700;color:#333;letter-spacing:0.1em;text-transform:uppercase;margin:0.8rem 0 0.3rem}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 1.2rem;font-size:0.82rem;color:var(--muted);text-decoration:none;transition:all .15s;border-left:2px solid transparent}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+.sb-item.active{color:var(--gold);background:rgba(245,166,35,0.06);border-left-color:var(--gold)}
+.sb-user{padding:1rem 1.2rem;border-top:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:10px}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E84545);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:#000;flex-shrink:0}
+.user-name{font-size:0.8rem;font-weight:600}.user-role{font-size:0.65rem;color:var(--muted)}
+.logout-btn{margin-left:auto;font-size:0.7rem;color:var(--muted);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:none;font-family:var(--font-b);transition:all .2s}
+.logout-btn:hover{color:var(--red);border-color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--dark);border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:var(--font-h);font-size:1rem;font-weight:700}
+.content{padding:2rem;flex:1}
+.page-title{font-family:var(--font-h);font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.4rem}
+.page-sub{font-size:0.84rem;color:var(--muted);margin-bottom:1.8rem;line-height:1.7}
+
+/* FILTER BAR */
+.filter-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.4rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.filter-label{font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.filter-select{padding:7px 12px;background:#141414;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-family:var(--font-b);outline:none;cursor:pointer;transition:border .2s}
+.filter-select:focus{border-color:rgba(245,166,35,0.4)}
+.filter-btn{padding:7px 16px;background:var(--gold);color:#000;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.filter-btn:hover{background:#e0941c}
+.reset-btn{padding:7px 14px;background:none;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:0.78rem;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.reset-btn:hover{color:var(--text);border-color:#444}
+
+/* JOB CARDS */
+.jobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:1.5rem}
+.job-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;transition:all .2s;position:relative;display:flex;flex-direction:column;gap:0.8rem}
+.job-card:hover{border-color:#2A2A2A;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+.jc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.jc-logo{width:42px;height:42px;border-radius:10px;background:#181818;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.jc-info{flex:1}
+.jc-title{font-family:var(--font-h);font-size:0.95rem;font-weight:700;margin-bottom:3px;line-height:1.3}
+.jc-company{font-size:0.78rem;color:var(--muted)}
+.jc-verified{font-size:0.62rem;padding:3px 9px;background:rgba(34,197,94,0.1);color:#86EFAC;border:1px solid rgba(34,197,94,0.2);border-radius:10px;white-space:nowrap;font-weight:700}
+.jc-tags{display:flex;flex-wrap:wrap;gap:6px}
+.jc-tag{font-size:0.65rem;padding:3px 10px;background:#181818;border:1px solid var(--border);border-radius:6px;color:var(--muted)}
+.jc-tag-gold{background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.2);color:var(--gold)}
+.jc-meta{display:flex;gap:12px;font-size:0.75rem;color:var(--muted)}
+.jc-meta span{display:flex;align-items:center;gap:4px}
+.jc-footer{display:flex;align-items:center;justify-content:space-between;padding-top:0.5rem;border-top:1px solid var(--border)}
+.jc-salary{font-size:0.82rem;font-weight:700;color:var(--gold)}
+.apply-btn{padding:7px 18px;background:var(--gold);color:#000;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:var(--font-b);transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.apply-btn:hover{background:#e0941c;color:#000}
+.save-btn{padding:7px 14px;background:none;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:0.78rem;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.save-btn:hover{border-color:var(--gold);color:var(--gold)}
+.match-bar{height:4px;background:#1A1A1A;border-radius:2px;overflow:hidden}
+.match-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.match-label{font-size:0.65rem;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:3px}
+
+/* SCAN BANNER */
+.scan-banner{background:linear-gradient(135deg,rgba(232,69,69,0.06),rgba(245,166,35,0.04));border:1px solid rgba(232,69,69,0.15);border-radius:14px;padding:1.4rem 2rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.sb-text h3{font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:4px}
+.sb-text p{font-size:0.8rem;color:var(--muted)}
+.scan-link{padding:9px 20px;background:var(--red);color:#fff;border:none;border-radius:9px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:var(--font-b);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.scan-link:hover{background:#c73535;color:#fff}
+
+/* PAGINATION */
+.pagination{display:flex;justify-content:center;gap:8px;margin-top:1rem}
+.page-btn{padding:7px 14px;background:#141414;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.78rem;cursor:pointer;font-family:var(--font-b);transition:all .2s}
+.page-btn:hover,.page-btn.active{background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.3);color:var(--gold)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:#1A1A1A;border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:0.8rem;color:var(--text);z-index:1000;transform:translateY(100px);opacity:0;transition:all .3s;max-width:300px}
+.toast.show{transform:translateY(0);opacity:1}
+
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.jobs-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="/landing.html" class="sb-logo">
+    <div class="sb-logo-mark">🛡️</div>
+    <div class="sb-logo-text">TrueHire AI</div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section">Navigation</div>
+    <a href="/dashboard.html" class="sb-item">📊 Overview</a>
+    <a href="/detector.html" class="sb-item">🛡️ Job Detector</a>
+    <a href="/recommend.html" class="sb-item active">💼 Job Matches</a>
+  </nav>
+  <div class="sb-user">
+    <div class="user-row">
+      <div class="user-avatar" id="sideAvatar">?</div>
+      <div>
+        <div class="user-name" id="sideName">Loading…</div>
+        <div class="user-role">Job Seeker</div>
+      </div>
+      <button class="logout-btn" onclick="signOut()">⎋</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">💼 Job Matches</div>
+    <div style="font-size:0.78rem;color:var(--muted)">Verified listings only</div>
+  </div>
+
+  <div class="content">
+    <div class="page-title">Job Recommendations</div>
+    <div class="page-sub">Browse verified job listings matched to your profile. All jobs shown here have been screened for fraud — safe to apply.</div>
+
+    <!-- SCAN BANNER -->
+    <div class="scan-banner">
+      <div class="sb-text">
+        <h3>🛡️ Found a job elsewhere?</h3>
+        <p>Paste any job description into our detector to instantly check if it's a scam.</p>
+      </div>
+      <a href="/detector.html" class="scan-link">🔍 Check a Job</a>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <select class="filter-select" id="filterRole" onchange="applyFilters()">
+        <option value="">All Roles</option>
+        <option value="developer">Developer</option>
+        <option value="data">Data / ML</option>
+        <option value="design">Design</option>
+        <option value="marketing">Marketing</option>
+        <option value="support">Support</option>
+      </select>
+      <select class="filter-select" id="filterType" onchange="applyFilters()">
+        <option value="">All Types</option>
+        <option value="full-time">Full-Time</option>
+        <option value="part-time">Part-Time</option>
+        <option value="remote">Remote</option>
+        <option value="internship">Internship</option>
+      </select>
+      <select class="filter-select" id="filterExp" onchange="applyFilters()">
+        <option value="">All Experience</option>
+        <option value="0">Fresher (0-1 yr)</option>
+        <option value="2">Mid (2-4 yrs)</option>
+        <option value="5">Senior (5+ yrs)</option>
+      </select>
+      <button class="reset-btn" onclick="resetFilters()">✕ Reset</button>
+    </div>
+
+    <!-- JOB CARDS -->
+    <div class="jobs-grid" id="jobsGrid">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Job data ──────────────────────────────────────────────────────────────
+const JOBS = [
+  {
+    id:1,title:'Senior Python Developer',company:'Zoho Corporation',logo:'🐍',location:'Chennai, Tamil Nadu',
+    type:'full-time',salary:'₹12–18 LPA',exp:3,match:94,role:'developer',
+    skills:['Python','Django','REST APIs','PostgreSQL','Redis'],
+    desc:'Build and maintain scalable backend services for Zoho\'s SaaS products. You will design RESTful APIs, optimize database queries, and collaborate with frontend teams. Strong understanding of system design required.',
+    requirements:['B.E/B.Tech in CS or related','3+ years Python experience','Experience with Django/Flask','Strong SQL skills'],
+    perks:['Health insurance','WFH 2 days/week','Annual bonus','Learning budget ₹50K/yr'],
+    email:'careers@zoho.com',apply:'https://careers.zoho.com',posted:'2 days ago'
+  },
+  {
+    id:2,title:'Machine Learning Engineer',company:'Freshworks',logo:'🤖',location:'Bangalore, Karnataka',
+    type:'full-time',salary:'₹15–22 LPA',exp:2,match:89,role:'data',
+    skills:['Python','TensorFlow','PyTorch','MLOps','AWS SageMaker'],
+    desc:'Design and deploy ML models for Freshworks CRM and customer engagement products. Work on NLP, recommendation systems, and predictive analytics. Collaborate with product teams to integrate AI features.',
+    requirements:['M.Tech/B.Tech in CS/AI/ML','2+ years ML experience','Strong Python and ML frameworks','Experience with cloud ML services'],
+    perks:['ESOP','Flexible hours','International travel opportunities','Gym membership'],
+    email:'ml-jobs@freshworks.com',apply:'https://careers.freshworks.com',posted:'1 day ago'
+  },
+  {
+    id:3,title:'Data Analyst',company:'Infosys',logo:'📊',location:'Pune, Maharashtra',
+    type:'full-time',salary:'₹6–10 LPA',exp:1,match:82,role:'data',
+    skills:['SQL','Python','Power BI','Excel','Tableau'],
+    desc:'Analyse business data to identify trends, build dashboards, and present insights to stakeholders. Work with cross-functional teams including product, sales, and operations. Create automated reports using Python and BI tools.',
+    requirements:['Bachelor\'s degree in any stream','1+ year analytical experience','Proficiency in SQL and Excel','Data visualization skills'],
+    perks:['Medical insurance','Global exposure','Structured career path','Training programs'],
+    email:'analyst@infosys.com',apply:'https://careers.infosys.com',posted:'3 days ago'
+  },
+  {
+    id:4,title:'React Frontend Developer',company:'Razorpay',logo:'⚛️',location:'Bangalore, Karnataka',
+    type:'full-time',salary:'₹10–16 LPA',exp:2,match:78,role:'developer',
+    skills:['React.js','JavaScript (ES6+)','TypeScript','CSS3','REST APIs'],
+    desc:'Build high-performance, accessible payment interfaces used by millions. Work on Razorpay\'s dashboard, checkout flows, and merchant tools. Focus on performance, accessibility, and user experience.',
+    requirements:['2+ years React experience','Strong JavaScript fundamentals','Experience with state management (Redux/Zustand)','Understanding of web performance'],
+    perks:['ESOPs','MacBook','Health + dental insurance','Unlimited snacks'],
+    email:'frontend@razorpay.com',apply:'https://razorpay.com/jobs',posted:'Today'
+  },
+  {
+    id:5,title:'UI/UX Designer',company:'Swiggy',logo:'🎨',location:'Bangalore, Karnataka',
+    type:'full-time',salary:'₹8–14 LPA',exp:2,match:74,role:'design',
+    skills:['Figma','User Research','Prototyping','Design Systems','Adobe XD'],
+    desc:'Design intuitive experiences for Swiggy\'s consumer and partner apps used by 50M+ users. Conduct user research, create wireframes, and work closely with engineering to ship pixel-perfect designs.',
+    requirements:['Portfolio demonstrating UX process','2+ years product design','Proficiency in Figma','Experience with mobile-first design'],
+    perks:['Free Swiggy credits','MacBook Pro','Flexible work','Annual design budget'],
+    email:'design@swiggy.in',apply:'https://careers.swiggy.com',posted:'4 days ago'
+  },
+  {
+    id:6,title:'Data Science Intern',company:'Paytm',logo:'📱',location:'Noida, Uttar Pradesh',
+    type:'internship',salary:'₹20–30K / month',exp:0,match:71,role:'data',
+    skills:['Python','Statistics','Scikit-learn','SQL','Jupyter'],
+    desc:'6-month paid internship in Paytm\'s Data Science team. Work on real fraud detection, credit scoring, and customer segmentation projects. Mentored by senior data scientists. PPO opportunity for top performers.',
+    requirements:['Pursuing B.Tech/M.Tech or recent grad','Knowledge of ML basics','Python proficiency','Statistics fundamentals'],
+    perks:['PPO opportunity','Mentorship','Certificate of completion','Laptop provided'],
+    email:'internships@paytm.com',apply:'https://paytm.com/careers',posted:'1 week ago'
+  },
+  {
+    id:7,title:'Backend Engineer (Node.js)',company:'BrowserStack',logo:'🌐',location:'Mumbai, Maharashtra',
+    type:'full-time',salary:'₹12–20 LPA',exp:3,match:68,role:'developer',
+    skills:['Node.js','MongoDB','Docker','Kubernetes','Redis','RabbitMQ'],
+    desc:'Build APIs and microservices for BrowserStack\'s cloud testing platform used by 50,000+ developers globally. Work on distributed systems, real-time features, and developer tools.',
+    requirements:['3+ years Node.js','Microservices architecture experience','Database design skills','Understanding of DevOps'],
+    perks:['Remote-friendly','$500 home office budget','Conference sponsorship','Health insurance'],
+    email:'engineering@browserstack.com',apply:'https://www.browserstack.com/careers',posted:'2 days ago'
+  },
+  {
+    id:8,title:'Digital Marketing Manager',company:'Flipkart',logo:'📦',location:'Bangalore (Remote OK)',
+    type:'remote',salary:'₹8–14 LPA',exp:2,match:65,role:'marketing',
+    skills:['SEO/SEM','Google Analytics','Meta Ads','Email Marketing','A/B Testing'],
+    desc:'Drive digital marketing campaigns for Flipkart\'s product categories. Manage paid media budgets, SEO strategy, and email campaigns. Analyse performance metrics and optimize for ROAS.',
+    requirements:['2+ years digital marketing','Google Ads/Meta certified (preferred)','Analytical mindset','E-commerce experience a plus'],
+    perks:['Employee discounts','WFH flexible','Health insurance','Annual trips'],
+    email:'mktg-careers@flipkart.com',apply:'https://www.flipkartcareers.com',posted:'5 days ago'
+  },
+  {
+    id:9,title:'Full Stack Developer (Python + React)',company:'TCS',logo:'💻',location:'Chennai, Tamil Nadu',
+    type:'full-time',salary:'₹6–12 LPA',exp:1,match:62,role:'developer',
+    skills:['Python','React','PostgreSQL','Docker','Git'],
+    desc:'Develop full-stack applications for enterprise clients across banking, retail, and healthcare. Work in agile teams with onsite opportunities at client locations.',
+    requirements:['B.E/B.Tech CS/IT','1+ year full-stack experience','Python backend + React frontend','Good communication skills'],
+    perks:['Global opportunities','Training programs','Medical insurance','Provident fund'],
+    email:'freshers@tcs.com',apply:'https://nextstep.tcs.com',posted:'Today'
+  },
+  {
+    id:10,title:'Customer Success Manager',company:'Chargebee',logo:'🎯',location:'Chennai, Tamil Nadu',
+    type:'full-time',salary:'₹7–12 LPA',exp:2,match:59,role:'support',
+    skills:['CRM Tools','SaaS Onboarding','Data Analysis','Communication','Salesforce'],
+    desc:'Own relationships with Chargebee\'s mid-market SaaS customers. Drive product adoption, resolve escalations, and conduct quarterly business reviews. Work with a global customer base.',
+    requirements:['2+ years in customer success or account management','SaaS experience preferred','Excellent English communication','Analytical skills'],
+    perks:['ESOPs','Unlimited PTO','Health + dental','International client exposure'],
+    email:'cs-jobs@chargebee.com',apply:'https://chargebee.com/careers',posted:'3 days ago'
+  },
+  {
+    id:11,title:'DevOps / Cloud Engineer',company:'Wipro',logo:'⚙️',location:'Hyderabad, Telangana',
+    type:'full-time',salary:'₹10–18 LPA',exp:3,match:57,role:'developer',
+    skills:['AWS/Azure','Docker','Kubernetes','Terraform','Jenkins','Linux'],
+    desc:'Design and manage cloud infrastructure for large-scale enterprise applications. Implement CI/CD pipelines, manage Kubernetes clusters, and ensure 99.9% uptime across client environments.',
+    requirements:['3+ years DevOps/cloud experience','AWS or Azure certification preferred','Strong Linux skills','Infrastructure as code experience'],
+    perks:['Certification reimbursement','Health insurance','Performance bonus','Remote flexibility'],
+    email:'devops-hiring@wipro.com',apply:'https://careers.wipro.com',posted:'1 week ago'
+  },
+  {
+    id:12,title:'Business Analyst',company:'Cognizant',logo:'📋',location:'Coimbatore, Tamil Nadu',
+    type:'full-time',salary:'₹6–10 LPA',exp:2,match:54,role:'support',
+    skills:['Requirement Gathering','JIRA','SQL','Process Mapping','MS Visio'],
+    desc:'Work with clients to understand business needs and translate them into technical requirements. Create BRDs, user stories, and process flow diagrams. Bridge between business stakeholders and development teams.',
+    requirements:['2+ years as BA','Understanding of SDLC/Agile','Strong documentation skills','Stakeholder management'],
+    perks:['Training & certification','Health insurance','Flexible hours','Global client exposure'],
+    email:'ba-careers@cognizant.com',apply:'https://careers.cognizant.com',posted:'2 days ago'
+  },
+  {
+    id:13,title:'Android Developer (Kotlin)',company:'Zomato',logo:'🍕',location:'Gurugram, Haryana',
+    type:'full-time',salary:'₹10–18 LPA',exp:2,match:52,role:'developer',
+    skills:['Kotlin','Android SDK','MVVM','Retrofit','Room DB'],
+    desc:'Build features for Zomato\'s consumer and delivery partner apps with 50M+ users. Work on real-time order tracking, payments, and restaurant discovery features.',
+    requirements:['2+ years Android development','Strong Kotlin skills','Experience with Jetpack components','Play Store publishing experience'],
+    perks:['Free Zomato Pro','ESOPs','MacBook','Health insurance'],
+    email:'android@zomato.com',apply:'https://careers.zomato.com',posted:'4 days ago'
+  },
+  {
+    id:14,title:'Technical Writer',company:'Freshworks',logo:'✍️',location:'Chennai, Tamil Nadu',
+    type:'full-time',salary:'₹5–9 LPA',exp:1,match:48,role:'support',
+    skills:['Technical Writing','Markdown','API Documentation','DITA','Git'],
+    desc:'Create developer documentation, API references, and user guides for Freshworks suite of SaaS products. Collaborate with engineering and product teams to document new features.',
+    requirements:['1+ year technical writing','Ability to understand and document APIs','Excellent written English','Experience with docs-as-code workflow preferred'],
+    perks:['Flexible hours','Health insurance','Learning budget','WFH 3 days/week'],
+    email:'techwriter@freshworks.com',apply:'https://careers.freshworks.com',posted:'6 days ago'
+  },
+  {
+    id:15,title:'Cybersecurity Analyst',company:'HCL Technologies',logo:'🔐',location:'Noida, Uttar Pradesh',
+    type:'full-time',salary:'₹8–15 LPA',exp:2,match:45,role:'developer',
+    skills:['SIEM','Penetration Testing','Network Security','Python','CEH/CISSP'],
+    desc:'Monitor, detect, and respond to security incidents for enterprise clients. Conduct vulnerability assessments, perform penetration testing, and implement security policies.',
+    requirements:['2+ years cybersecurity experience','CEH or equivalent certification preferred','Knowledge of OWASP top 10','Incident response experience'],
+    perks:['Certification sponsorship','Global projects','Health insurance','Annual bonus'],
+    email:'security-careers@hcl.com',apply:'https://www.hcltech.com/careers',posted:'1 week ago'
+  },
+];
+
+const ITEMS_PER_PAGE = 6;
+let currentPage = 1;
+let filteredJobs = [...JOBS];
+const savedJobs = new Set();
+
+// ── Render cards ──────────────────────────────────────────────────────────
+function renderJobs(){
+  const grid = document.getElementById('jobsGrid');
+  const start = (currentPage-1)*ITEMS_PER_PAGE;
+  const page  = filteredJobs.slice(start, start+ITEMS_PER_PAGE);
+
+  if(!page.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">No jobs match your filters. <button onclick="resetFilters()" style="color:var(--gold);background:none;border:none;cursor:pointer;font-size:0.82rem;">Reset filters</button></div>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  grid.innerHTML = page.map(j=>{
+    const matchColor = j.match>=80?'#22C55E':j.match>=60?'#F5A623':'#3B82F6';
+    const tags = j.skills.slice(0,4).map(s=>'<span class="jc-tag">'+s+'</span>').join('');
+    const isSaved = savedJobs.has(j.id);
+    const reqHtml = (j.requirements||[]).slice(0,3).map(r=>'<div style="font-size:0.68rem;color:var(--muted);padding:2px 0">• '+r+'</div>').join('');
+    const perksHtml = (j.perks||[]).slice(0,3).map(p=>'<span style="font-size:0.62rem;padding:2px 8px;background:#181818;border:1px solid var(--border);border-radius:5px;color:var(--muted)">'+p+'</span>').join('');
+    return '<div class="job-card" id="jc-'+j.id+'">'+
+      '<div class="jc-top">'+
+        '<div class="jc-logo">'+j.logo+'</div>'+
+        '<div class="jc-info">'+
+          '<div class="jc-title">'+j.title+'</div>'+
+          '<div class="jc-company">'+j.company+' · '+j.location+'</div>'+
+        '</div>'+
+        '<div class="jc-verified">\u2713 Verified</div>'+
+      '</div>'+
+      '<div style="font-size:0.76rem;color:var(--muted);line-height:1.5;margin-bottom:0.7rem">'+j.desc+'</div>'+
+      '<div class="jc-tags" style="margin-bottom:0.6rem">'+tags+'<span class="jc-tag jc-tag-gold">'+j.type+'</span></div>'+
+      '<div class="jc-meta" style="margin-bottom:0.6rem">'+
+        '<span>📍 '+j.location+'</span>'+
+        '<span>🎓 '+(j.exp===0?'Fresher / 0 yr':j.exp+'+ yrs exp')+'</span>'+
+        '<span>📅 '+( j.posted||'Recently')+'</span>'+
+      '</div>'+
+      (reqHtml?'<div style="margin-bottom:0.6rem"><div style="font-size:0.62rem;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Requirements</div>'+reqHtml+'</div>':'')+
+      (perksHtml?'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:0.8rem">'+perksHtml+'</div>':'')+
+      '<div style="margin-bottom:0.8rem">'+
+        '<div class="match-label"><span>Profile Match</span><span style="color:'+matchColor+'">'+j.match+'%</span></div>'+
+        '<div class="match-bar"><div class="match-fill" style="width:'+j.match+'%;background:'+matchColor+'"></div></div>'+
+      '</div>'+
+      '<div class="jc-footer">'+
+        '<div class="jc-salary">'+j.salary+'</div>'+
+        '<div style="display:flex;gap:6px">'+
+          '<button class="save-btn" id="save-'+j.id+'" onclick="toggleSave('+j.id+')">'+
+            (isSaved?'\u2665 Saved':'\u2661 Save')+
+          '</button>'+
+          '<a class="apply-btn" href="mailto:'+j.email+'?subject=Application for '+encodeURIComponent(j.title)+'&body=Dear Hiring Team,%0D%0A%0D%0AI am interested in the '+encodeURIComponent(j.title)+' position at '+encodeURIComponent(j.company)+'.%0D%0A%0D%0APlease find my resume attached.%0D%0A%0D%0ARegards">Apply →</a>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  renderPagination();
+}
+
+// ── Pagination ─────────────────────────────────────────────────────────────
+function renderPagination(){
+  const total = Math.ceil(filteredJobs.length / ITEMS_PER_PAGE);
+  if(total<=1){document.getElementById('pagination').innerHTML='';return;}
+  let html = '';
+  for(let i=1;i<=total;i++){
+    html += '<button class="page-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+  }
+  document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(n){
+  currentPage = n;
+  renderJobs();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Save job ───────────────────────────────────────────────────────────────
+function toggleSave(id){
+  const btn = document.getElementById('save-'+id);
+  if(savedJobs.has(id)){
+    savedJobs.delete(id);
+    btn.textContent = '\u2661 Save';
+    showToast('Job removed from saved list');
+  } else {
+    savedJobs.add(id);
+    btn.textContent = '\u2665 Saved';
+    showToast('\u2705 Job saved! Check your saved list.');
+  }
+}
+
+// ── Filters ────────────────────────────────────────────────────────────────
+function applyFilters(){
+  const role = document.getElementById('filterRole').value;
+  const type = document.getElementById('filterType').value;
+  const exp  = document.getElementById('filterExp').value;
+  filteredJobs = JOBS.filter(j=>{
+    if(role && j.role !== role)     return false;
+    if(type && j.type !== type)     return false;
+    if(exp!=='' && j.exp < parseInt(exp)) return false;
+    return true;
+  });
+  currentPage = 1;
+  renderJobs();
+}
+
+function resetFilters(){
+  document.getElementById('filterRole').value = '';
+  document.getElementById('filterType').value = '';
+  document.getElementById('filterExp').value  = '';
+  filteredJobs = [...JOBS];
+  currentPage  = 1;
+  renderJobs();
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ── Auth ───────────────────────────────────────────────────────────────────
+fetch('/api/auth/user')
+  .then(r=>{ if(r.status===401){window.location.href='/login.html';return null;} return r.json(); })
+  .then(d=>{
+    if(!d||!d.authenticated){window.location.href='/login.html';return;}
+    const fn=d.first_name||'?', ln=d.last_name||'';
+    document.getElementById('sideName').textContent   = fn+' '+ln;
+    document.getElementById('sideAvatar').textContent = (fn[0]||'?').toUpperCase()+(ln[0]||'').toUpperCase();
+  })
+  .catch(()=>{window.location.href='/login.html';});
+
+function signOut(){
+  fetch('/api/auth/logout',{method:'POST'})
+    .then(()=>{window.location.href='/login.html';})
+    .catch(()=>{window.location.href='/login.html';});
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+renderJobs();
+</script>
+</body>
+</html>
