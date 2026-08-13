@@ -113,13 +113,13 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);display:fl
 <div class="main">
   <div class="topbar">
     <div class="topbar-title">💼 Job Matches</div>
-    <div style="font-size:0.78rem;color:var(--muted)">Verified listings only</div>
+    <div style="font-size:0.78rem;color:var(--muted)">Sample listings — academic demo</div>
   </div>
 
   <div class="content">
     <p style="margin:0 0 16px;padding:10px 12px;border:1px solid #6B4E16;border-radius:8px;color:#F5A623;font-size:.78rem">Academic demo: these are sample listings, not verified job offers. Verify every employer independently.</p>
     <div class="page-title">Job Recommendations</div>
-    <div class="page-sub">Browse verified job listings matched to your profile. All jobs shown here have been screened for fraud — safe to apply.</div>
+    <div class="page-sub">Browse sample listings used only to demonstrate filtering and matching. They are not live or verified job offers, so do not apply or share personal information.</div>
 
     <!-- SCAN BANNER -->
     <div class="scan-banner">
@@ -339,7 +339,7 @@ function renderJobs(){
           '<div class="jc-title">'+j.title+'</div>'+
           '<div class="jc-company">'+j.company+' · '+j.location+'</div>'+
         '</div>'+
-        '<div class="jc-verified">\u2713 Verified</div>'+
+        '<div class="jc-verified">Sample data</div>'+
       '</div>'+
       '<div style="font-size:0.76rem;color:var(--muted);line-height:1.5;margin-bottom:0.7rem">'+j.desc+'</div>'+
       '<div class="jc-tags" style="margin-bottom:0.6rem">'+tags+'<span class="jc-tag jc-tag-gold">'+j.type+'</span></div>'+
@@ -360,7 +360,7 @@ function renderJobs(){
           '<button class="save-btn" id="save-'+j.id+'" onclick="toggleSave('+j.id+')">'+
             (isSaved?'\u2665 Saved':'\u2661 Save')+
           '</button>'+
-          '<a class="apply-btn" href="mailto:'+j.email+'?subject=Application for '+encodeURIComponent(j.title)+'&body=Dear Hiring Team,%0D%0A%0D%0AI am interested in the '+encodeURIComponent(j.title)+' position at '+encodeURIComponent(j.company)+'.%0D%0A%0D%0APlease find my resume attached.%0D%0A%0D%0ARegards">Apply →</a>'+
+          '<button class="apply-btn" type="button" onclick="showToast(\'Demo listing only — no application is sent.\')">Demo only</button>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -392,11 +392,11 @@ function toggleSave(id){
   if(savedJobs.has(id)){
     savedJobs.delete(id);
     btn.textContent = '\u2661 Save';
-    showToast('Job removed from saved list');
+    showToast('Sample listing removed from saved list');
   } else {
     savedJobs.add(id);
     btn.textContent = '\u2665 Saved';
-    showToast('\u2705 Job saved! Check your saved list.');
+    showToast('\u2705 Sample listing saved for this browser session.');
   }
 }
 
