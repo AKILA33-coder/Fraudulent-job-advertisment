@@ -392,14 +392,42 @@ def predict_fraud(text):
         return rule_score
 
 # ==============================================================================
-# AUTH DECORATOR
+# DEMO ACCESS
 # ==============================================================================
+
+def ensure_demo_session():
+    """Use one non-personal demo profile; this public demo never collects credentials."""
+    if session.get('user_id'):
+        return
+
+    conn = get_db()
+    try:
+        c = conn.cursor()
+        c.execute('SELECT id FROM users WHERE email=?', ('demo@truehire.local',))
+        user = c.fetchone()
+        if user is None:
+            c.execute('''INSERT INTO users
+                         (email, password, first_name, last_name, role, status)
+                         VALUES (?, ?, ?, ?, ?, ?)''',
+                      ('demo@truehire.local', 'demo-account-no-login',
+                       'Demo', 'User', 'jobseeker', 'active'))
+            conn.commit()
+            user_id = c.lastrowid
+        else:
+            user_id = user['id']
+    finally:
+        conn.close()
+
+    session.permanent = True
+    session['user_id'] = user_id
+    session['email'] = 'demo@truehire.local'
+    session['first_name'] = 'Demo'
+    session['role'] = 'jobseeker'
 
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'user_id' not in session:
-            return jsonify({'error': 'Not authenticated', 'redirect': '/login.html'}), 401
+        ensure_demo_session()
         return f(*args, **kwargs)
     return decorated
 
@@ -417,26 +445,23 @@ def landing():
 
 @app.route('/login.html')
 def login_page():
-    if 'user_id' in session:
-        return redirect('/admin.html' if session.get('role') == 'admin' else '/dashboard.html')
-    return app.send_static_file('login.html')
+    # The deployed site is an academic demo, not an account service.
+    ensure_demo_session()
+    return redirect('/dashboard.html')
 
 @app.route('/dashboard.html')
 def dashboard():
-    if 'user_id' not in session:
-        return redirect('/login.html')
+    ensure_demo_session()
     return app.send_static_file('dashboard.html')
 
 @app.route('/detector.html')
 def detector():
-    if 'user_id' not in session:
-        return redirect('/login.html')
+    ensure_demo_session()
     return app.send_static_file('detector.html')
 
 @app.route('/recommend.html')
 def recommend():
-    if 'user_id' not in session:
-        return redirect('/login.html')
+    ensure_demo_session()
     return app.send_static_file('recommend.html')
 
 @app.route('/admin.html')
@@ -449,6 +474,7 @@ def admin():
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
+    return jsonify({'error': 'This academic demo does not create accounts or collect personal information.'}), 410
     data       = request.get_json(silent=True) or {}
     email      = data.get('email', '').strip().lower()
     password   = data.get('password', '')
@@ -512,6 +538,7 @@ def register():
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
+    return jsonify({'error': 'This academic demo does not accept login credentials.'}), 410
     data     = request.get_json(silent=True) or {}
     email    = data.get('email', '').strip().lower()
     password = data.get('password', '')
